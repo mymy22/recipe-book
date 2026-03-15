@@ -5,276 +5,357 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="レシピ帳">
+<meta name="apple-mobile-web-app-title" content="My Recipe Book">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#E8622A">
-<title>🍳 My Recipe Book</title>
+<meta name="theme-color" content="#3D2E1E">
+<title>My Recipe Book</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
+:root{
+  /* ベージュパレット */
+  --b1:#FAF6EE;
+  --b2:#F2EAD8;
+  --b3:#E0D0B4;
+  --b4:#C8B490;
+  --b5:#A89070;
+
+  /* ブラウン */
+  --br:#3D2E1E;
+  --bm:#6B5040;
+  --bl:#9C8068;
+
+  /* 山吹色アクセント */
+  --am:#C8980A;   /* 山吹色メイン */
+  --al:#E0AE20;   /* 山吹色ライト */
+  --ad:#9A7208;   /* 山吹色ダーク */
+  --ap:#FBF4DC;   /* 山吹色ペール */
+
+  /* 食材カテゴリカラー */
+  --c-pork:#C85A3A;      /* 豚肉 - テラコッタ */
+  --c-beef:#8B3A2A;      /* 牛肉 - バーガンディ */
+  --c-chicken:#D4844A;   /* 鶏肉 - オレンジブラウン */
+  --c-seafood:#3A6A8A;   /* 魚介 - スティールブルー */
+  --c-egg:#D4A820;       /* 卵乳 - アンバー */
+  --c-veg:#4A7A3A;       /* 野菜 - フォレストグリーン */
+  --c-mush:#7A5A3A;      /* きのこ - アースブラウン */
+  --c-grain:#A08A5A;     /* 穀物 - ウィートゴールド */
+  --c-beans:#5A6A3A;     /* 豆 - オリーブグリーン */
+
+  /* その他 */
+  --rd:#9A3A2A;
+  --rdp:#F8EAE6;
+  --wh:#FEFCF7;
+}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
-body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;background:#FFF8F0;overscroll-behavior:none}
-input,select,textarea,button{font-family:inherit}
+html,body{background:var(--b1);overscroll-behavior:none}
+body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;color:var(--br);font-weight:400}
+.serif{font-family:'Playfair Display',Georgia,serif}
+input,select,textarea,button{font-family:'Noto Sans JP',sans-serif;color:var(--br)}
 ::-webkit-scrollbar{display:none}
-.app{max-width:430px;margin:0 auto;min-height:100vh;position:relative}
-.scroll-row{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid #F0DDD0;scrollbar-width:none}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end}
-.modal-box{background:#fff;border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:82vh;display:flex;flex-direction:column}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:2px solid #F0DDD0;display:flex;z-index:200}
-.fab{position:fixed;bottom:74px;right:max(16px,calc(50% - 200px));background:#E8622A;color:#fff;border:none;border-radius:50%;width:54px;height:54px;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(232,98,42,.4);display:flex;align-items:center;justify-content:center;z-index:150}
-.chip{border:2px solid #F0DDD0;background:#FFFAF7;color:#9C6E4A;border-radius:99px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
-.on{border:none!important;background:#E8622A!important;color:#fff!important}
-.card{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07);cursor:pointer;border:1px solid #F0DDD0}
-.fi{width:100%;padding:12px 14px;border:2px solid #F0DDD0;border-radius:12px;font-size:16px;background:#FFFAF7;color:#2D1B0E;outline:none;display:block}
+.app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--b1)}
+
+.srow{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:var(--wh);border-bottom:1px solid var(--b3);scrollbar-width:none}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
+
+.mbg{position:fixed;inset:0;background:rgba(30,18,8,.65);z-index:500;display:flex;align-items:flex-end}
+.mbox{background:var(--b1);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:84vh;display:flex;flex-direction:column;border-top:2px solid var(--am)}
+
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--wh);border-top:1px solid var(--b3);display:flex;z-index:200}
+.fab{position:fixed;bottom:72px;right:max(16px,calc(50% - 200px));background:var(--am);color:var(--wh);border:none;border-radius:50%;width:54px;height:54px;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(200,152,10,.4);display:flex;align-items:center;justify-content:center;z-index:150;font-family:'Playfair Display',serif;font-weight:400}
+
+.chip{border:1px solid var(--b3);background:var(--wh);color:var(--bm);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.on{border-color:var(--am)!important;background:var(--am)!important;color:var(--wh)!important}
+
+.card{background:var(--wh);border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(61,46,30,.07);cursor:pointer;border:1px solid var(--b3)}
+
+.fi{width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:12px;font-size:16px;background:var(--wh);color:var(--br);outline:none;display:block}
+.fi:focus{border-color:var(--am)}
 textarea.fi{resize:vertical;min-height:80px}
-.lbl{font-size:12px;font-weight:800;color:#9C6E4A;margin-bottom:5px;display:block;letter-spacing:.3px}
-.btn{background:#E8622A;color:#fff;border:none;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:800;cursor:pointer;width:100%;display:block;text-align:center}
-.btn.sec{background:#FFF5EE;color:#E8622A;border:2px solid #F0DDD0}
-.btn.danger{background:#FFF0F0;color:#DC2626;border:2px solid #FECACA}
-.btn:disabled{background:#D1D5DB;color:#9CA3AF;cursor:not-allowed}
+.lbl{font-size:10px;font-weight:700;color:var(--b5);margin-bottom:6px;display:block;letter-spacing:1.5px;text-transform:uppercase}
+
+.btn{background:var(--am);color:var(--wh);border:none;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:600;cursor:pointer;width:100%;display:block;text-align:center;letter-spacing:.3px}
+.btn.sec{background:var(--b2);color:var(--bm);border:1px solid var(--b3)}
+.btn.danger{background:var(--rdp);color:var(--rd);border:1px solid #DDB8B0}
+.btn:disabled{background:var(--b3);color:var(--bl);cursor:not-allowed}
+
+/* 食材カテゴリカラーブロック */
+.cat-block{display:inline-flex;align-items:center;gap:6px}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-bar{width:3px;border-radius:99px;flex-shrink:0}
+
+/* 山吹色アクセントライン */
+.amber-line{height:2px;background:linear-gradient(90deg,var(--am),var(--al),transparent)}
 </style>
 </head>
 <body>
 <div class="app" id="app"></div>
 <script>
-const AC="#E8622A";
 const GENRES=["すべて","和食","洋食","中華","韓国料理","イタリアン","デザート","お弁当","麺・パスタ","スープ","サラダ","その他"];
-const SOURCES=[{id:"instagram",label:"Instagram",color:"#E1306C",emoji:"📸"},{id:"youtube",label:"YouTube",color:"#FF0000",emoji:"▶️"},{id:"tiktok",label:"TikTok",color:"#555",emoji:"🎵"},{id:"twitter",label:"X",color:"#1DA1F2",emoji:"✕"},{id:"cookpad",label:"Cookpad",color:"#F76300",emoji:"🍳"},{id:"kurashiru",label:"クラシル",color:"#3CB371",emoji:"🥗"},{id:"website",label:"Webサイト",color:"#6B7280",emoji:"🌐"},{id:"memo",label:"自分メモ",color:"#8B5CF6",emoji:"📝"}];
-const SM=Object.fromEntries(SOURCES.map(s=>[s.id,s]));
-const DEFING=[
-  {id:"pork",icon:"🐷",name:"豚肉",items:["豚バラ","豚こま切れ","豚ロース","豚肩ロース","豚もも","豚ひき肉","豚スペアリブ","豚レバー"]},
-  {id:"beef",icon:"🐄",name:"牛肉",items:["牛バラ","牛こま切れ","牛ロース","牛ひき肉","牛もも","牛すね","牛タン","牛カルビ"]},
-  {id:"chicken",icon:"🐔",name:"鶏肉",items:["鶏むね肉","鶏もも肉","鶏ささみ","鶏手羽元","鶏手羽先","鶏ひき肉","鶏レバー","鶏皮"]},
-  {id:"seafood",icon:"🐟",name:"魚介",items:["サーモン","マグロ","アジ","サバ","鮭","タラ","エビ","イカ","ホタテ","アサリ","カニ","タコ"]},
-  {id:"egg",icon:"🥚",name:"卵・乳製品",items:["卵","牛乳","生クリーム","バター","チーズ","ヨーグルト","豆腐","油揚げ"]},
-  {id:"veg",icon:"🥦",name:"野菜",items:["玉ねぎ","にんにく","しょうが","じゃがいも","にんじん","大根","キャベツ","レタス","トマト","なす","ピーマン","ブロッコリー","ほうれん草","小松菜","白菜","もやし","ねぎ","ごぼう","れんこん","アボカド"]},
-  {id:"mush",icon:"🍄",name:"きのこ",items:["しいたけ","えのき","しめじ","エリンギ","なめこ","まいたけ"]},
-  {id:"grain",icon:"🌾",name:"穀物・麺",items:["米","パスタ","うどん","そば","ラーメン","そうめん","パン粉","小麦粉","片栗粉"]},
-  {id:"beans",icon:"🫘",name:"豆・大豆",items:["豆腐","納豆","大豆","ひよこ豆","小豆","枝豆","厚揚げ"]}
+const SOURCES=[
+  {id:"instagram",label:"Instagram",color:"#B03A70"},
+  {id:"youtube",label:"YouTube",color:"#B03030"},
+  {id:"tiktok",label:"TikTok",color:"#505050"},
+  {id:"twitter",label:"X / Twitter",color:"#2060A0"},
+  {id:"cookpad",label:"Cookpad",color:"#B05800"},
+  {id:"kurashiru",label:"クラシル",color:"#306A30"},
+  {id:"website",label:"Web サイト",color:"#506070"},
+  {id:"memo",label:"自分メモ",color:"#5A4A80"}
 ];
+const SM=Object.fromEntries(SOURCES.map(s=>[s.id,s]));
+
+// 食材カテゴリ：colorで視覚的に識別
+const DEFING=[
+  {id:"pork",    color:"#C85A3A", name:"豚肉",    items:["豚バラ","豚こま切れ","豚ロース","豚肩ロース","豚もも","豚ひき肉","豚スペアリブ","豚レバー"]},
+  {id:"beef",    color:"#8B3A2A", name:"牛肉",    items:["牛バラ","牛こま切れ","牛ロース","牛ひき肉","牛もも","牛すね","牛タン","牛カルビ"]},
+  {id:"chicken", color:"#D4844A", name:"鶏肉",    items:["鶏むね肉","鶏もも肉","鶏ささみ","鶏手羽元","鶏手羽先","鶏ひき肉","鶏レバー","鶏皮"]},
+  {id:"seafood", color:"#3A6A8A", name:"魚介",    items:["サーモン","マグロ","アジ","サバ","鮭","タラ","エビ","イカ","ホタテ","アサリ","カニ","タコ"]},
+  {id:"egg",     color:"#D4A820", name:"卵・乳製品", items:["卵","牛乳","生クリーム","バター","チーズ","ヨーグルト","豆腐","油揚げ"]},
+  {id:"veg",     color:"#4A7A3A", name:"野菜",    items:["玉ねぎ","にんにく","しょうが","じゃがいも","にんじん","大根","キャベツ","レタス","トマト","なす","ピーマン","ブロッコリー","ほうれん草","小松菜","白菜","もやし","ねぎ","ごぼう","れんこん","アボカド"]},
+  {id:"mush",    color:"#7A5A3A", name:"きのこ",  items:["しいたけ","えのき","しめじ","エリンギ","なめこ","まいたけ"]},
+  {id:"grain",   color:"#A08A5A", name:"穀物・麺", items:["米","パスタ","うどん","そば","ラーメン","そうめん","パン粉","小麦粉","片栗粉"]},
+  {id:"beans",   color:"#5A6A3A", name:"豆・大豆", items:["豆腐","納豆","大豆","ひよこ豆","小豆","枝豆","厚揚げ"]}
+];
+const IM=Object.fromEntries(DEFING.map(c=>[c.id,c]));
+
 const SEED=[
-  {id:"1",title:"肉じゃが",genre:"和食",source:"cookpad",url:"https://cookpad.com",thumbnail:"https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80",memo:"砂糖大さじ2、醤油大さじ3。じゃがいもは最後に入れると崩れない！",tags:["定番","お弁当OK"],rating:5,cookedCount:8,createdAt:Date.now()-864e5*10,ingredients:["豚こま切れ","じゃがいも","玉ねぎ","にんじん"]},
+  {id:"1",title:"肉じゃが",genre:"和食",source:"cookpad",url:"https://cookpad.com",thumbnail:"https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400&q=80",memo:"砂糖大さじ2、醤油大さじ3。じゃがいもは最後に入れると崩れない！",tags:["定番","お弁当"],rating:5,cookedCount:8,createdAt:Date.now()-864e5*10,ingredients:["豚こま切れ","じゃがいも","玉ねぎ","にんじん"]},
   {id:"2",title:"カルボナーラ",genre:"イタリアン",source:"youtube",url:"",thumbnail:"https://images.unsplash.com/photo-1612874742237-6526221588e3?w=400&q=80",memo:"卵黄2個＋全卵1個。火を止めてから混ぜるのがポイント。",tags:["時短","パスタ"],rating:4,cookedCount:5,createdAt:Date.now()-864e5*5,ingredients:["パスタ","卵","生クリーム","チーズ"]},
   {id:"3",title:"キムチ鍋",genre:"韓国料理",source:"tiktok",url:"",thumbnail:"https://images.unsplash.com/photo-1583224964978-2257b8a897b8?w=400&q=80",memo:"キムチ200g、豆腐1丁、豚バラ200g。ごま油で仕上げ。",tags:["冬","鍋"],rating:4,cookedCount:6,createdAt:Date.now()-864e5*1,ingredients:["豚バラ","豆腐","白菜","ねぎ","えのき"]},
-  {id:"4",title:"鶏むね照り焼き",genre:"和食",source:"kurashiru",url:"",thumbnail:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&q=80",memo:"醤油・みりん・酒各大さじ2。片栗粉まぶすとジューシー！",tags:["ヘルシー","お弁当OK"],rating:5,cookedCount:12,createdAt:Date.now()-864e5*3,ingredients:["鶏むね肉","しょうが","にんにく"]}
+  {id:"4",title:"鶏むね照り焼き",genre:"和食",source:"kurashiru",url:"",thumbnail:"https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400&q=80",memo:"醤油・みりん・酒各大さじ2。片栗粉まぶすとジューシー！",tags:["ヘルシー","お弁当"],rating:5,cookedCount:12,createdAt:Date.now()-864e5*3,ingredients:["鶏むね肉","しょうが","にんにく"]}
 ];
 
-// ─── DB (localStorage) ───────────────────────────────────────────────────────
-const DB_KEY="rb_v4";
-function dbLoad(){try{const d=localStorage.getItem(DB_KEY);return d?JSON.parse(d):null;}catch{return null;}}
-function dbSave(d){try{localStorage.setItem(DB_KEY,JSON.stringify(d));}catch{}}
-let DB=dbLoad();
-if(!DB){DB={recipes:JSON.parse(JSON.stringify(SEED)),users:[],ingMaster:JSON.parse(JSON.stringify(DEFING))};dbSave(DB);}
-if(!DB.ingMaster){DB.ingMaster=JSON.parse(JSON.stringify(DEFING));dbSave(DB);}
+const DBK="rb_v5",SSK="rb_s5";
+function dbl(){try{const d=localStorage.getItem(DBK);return d?JSON.parse(d):null;}catch{return null;}}
+function dbs(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch{}}
+let DB=dbl();
+if(!DB){DB={recipes:JSON.parse(JSON.stringify(SEED)),users:[],ingMaster:JSON.parse(JSON.stringify(DEFING))};dbs(DB);}
+if(!DB.ingMaster){DB.ingMaster=JSON.parse(JSON.stringify(DEFING));dbs(DB);}
 
-// ─── State ───────────────────────────────────────────────────────────────────
-const SESS="rb_sess_v4";
 let U=null;
-try{const s=sessionStorage.getItem(SESS);if(s){const u=JSON.parse(s);const f=DB.users.find(x=>x.email===u.email);if(f)U=f;}}catch{}
+try{const s=sessionStorage.getItem(SSK);if(s){const u=JSON.parse(s);const f=DB.users.find(x=>x.email===u.email);if(f)U=f;}}catch{}
 
 let V={
-  view:U?"home":"login",
-  recipes:[...DB.recipes],
-  ingMaster:[...DB.ingMaster],
-  sel:null,
+  view:U?"home":"login",recipes:[...DB.recipes],ingMaster:[...DB.ingMaster],sel:null,
   fGenre:"すべて",fSrc:"all",q:"",sort:"newest",fIng:[],
   showIM:false,showCM:false,showFI:false,
   form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},
   fStep:1,saving:false,aiState:"idle",aiMsg:"",
   lf:{email:"",password:"",name:"",isNew:false},lErr:"",
-  imc:null,fic:null,cmt:"list",cme:null,cnn:"",cni:"🍱",fc:null
+  imc:null,fic:null,cmt:"list",cme:null,cnn:"",cncol:"#C85A3A",fc:null
 };
-
 function sv(p){Object.assign(V,p);render();}
 window.sv=sv;
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 function dSrc(u){if(!u)return"memo";if(u.includes("instagram"))return"instagram";if(u.includes("youtube")||u.includes("youtu.be"))return"youtube";if(u.includes("tiktok"))return"tiktok";if(u.includes("twitter")||u.includes("x.com"))return"twitter";if(u.includes("cookpad"))return"cookpad";if(u.includes("kurashiru"))return"kurashiru";return"website";}
 function ytT(u){const m=u.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?"https://img.youtube.com/vi/"+m[1]+"/hqdefault.jpg":null;}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
-function stars(v,ed){return[1,2,3,4,5].map(n=>`<span style="font-size:20px;cursor:${ed?"pointer":"default"};color:${n<=v?"#F59E0B":"#D1D5DB"}" ${ed?`onclick="setStar(${n})"`:""}">★</span>`).join("");}
-function badge(sid,sm){const s=SM[sid]||SM.memo;return`<span style="display:inline-flex;align-items:center;gap:3px;background:${s.color}22;color:${s.color};border:1px solid ${s.color}44;border-radius:99px;padding:${sm?"1px 7px":"3px 10px"};font-size:${sm?10:11}px;font-weight:700;white-space:nowrap">${s.emoji} ${s.label}</span>`;}
-function chip(label,active,oc){return`<button class="chip${active?" on":""}" onclick="${oc}">${label}</button>`;}
-function navBar(active){
-  return`<div class="bottom-nav">${[["home","🏠","ホーム"],["add","➕","追加"],["fridge","🥕","冷蔵庫"]].map(([v,ic,lb])=>`<button onclick="${v==="add"?"goAdd()":"sv({view:'"+v+"'})"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 10px;gap:2px;background:none;border:none;cursor:pointer;color:${active===v?AC:"#C4A98A"}"><span style="font-size:22px">${ic}</span><span style="font-size:10px;font-weight:700">${lb}</span></button>`).join("")}</div>`;
+
+function stars(v,ed){
+  return`<div style="display:flex;gap:3px;align-items:center">${[1,2,3,4,5].map(n=>`<span style="font-size:14px;cursor:${ed?"pointer":"default"};color:${n<=v?"var(--am)":"var(--b3)"};line-height:1" ${ed?`onclick="setStar(${n})"`:""}">★</span>`).join("")}</div>`;
 }
 
-// ─── Auth ─────────────────────────────────────────────────────────────────────
+function badge(sid,sm){
+  const s=SM[sid]||SM.memo;
+  return`<span style="display:inline-flex;align-items:center;gap:5px;background:${s.color}14;color:${s.color};border:1px solid ${s.color}28;border-radius:4px;padding:${sm?"2px 8px":"3px 10px"};font-size:${sm?10:11}px;font-weight:500;white-space:nowrap">
+    <span style="width:5px;height:5px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>${s.label}
+  </span>`;
+}
+
+// 食材にカテゴリカラーのドットをつける
+function ingTag(item,highlight){
+  const cat=V.ingMaster.find(c=>c.items.includes(item));
+  const color=cat?.color||"var(--b4)";
+  return`<span style="display:inline-flex;align-items:center;gap:5px;background:${highlight?color+"22":"var(--b2)"};border:1px solid ${highlight?color+"44":"var(--b3)"};border-radius:99px;padding:4px 12px;font-size:12px;color:${highlight?color:"var(--bm)"};font-weight:${highlight?"600":"400"}">
+    <span style="width:6px;height:6px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span>${esc(item)}
+  </span>`;
+}
+
+function chip(l,on,oc){return`<button class="chip${on?" on":""}" onclick="${oc}">${l}</button>`;}
+function navBar(act){
+  const tabs=[["home","一覧","≡"],["add","追加","＋"],["fridge","冷蔵庫","▦"]];
+  return`<div class="bnav">${tabs.map(([v,lb,ic])=>`<button onclick="${v==="add"?"goAdd()":"sv({view:'"+v+"'})"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 10px;gap:2px;background:none;border:none;cursor:pointer;color:${act===v?"var(--am)":"var(--b4)"}">
+    <span style="font-size:18px;font-family:'Playfair Display',serif;line-height:1">${ic}</span>
+    <span style="font-size:10px;letter-spacing:.5px">${lb}</span>
+  </button>`).join("")}</div>`;
+}
+
 window.doAuth=()=>{
   const f=V.lf;
   if(f.isNew){
     if(!f.name.trim())return sv({lErr:"お名前を入力してください"});
-    if(f.password.length<6)return sv({lErr:"パスワードは6文字以上"});
-    if(DB.users.find(u=>u.email===f.email))return sv({lErr:"このメールは登録済みです"});
+    if(f.password.length<6)return sv({lErr:"パスワードは6文字以上にしてください"});
+    if(DB.users.find(u=>u.email===f.email))return sv({lErr:"このメールアドレスは登録済みです"});
     const nu={email:f.email,password:f.password,name:f.name};
-    DB.users.push(nu);dbSave(DB);
-    U=nu;sessionStorage.setItem(SESS,JSON.stringify(nu));
-    sv({view:"home",lErr:""});
+    DB.users.push(nu);dbs(DB);U=nu;sessionStorage.setItem(SSK,JSON.stringify(nu));sv({view:"home",lErr:""});
   }else{
-    const found=DB.users.find(u=>u.email===f.email&&u.password===f.password);
-    if(!found)return sv({lErr:"メールかパスワードが違います"});
-    U=found;sessionStorage.setItem(SESS,JSON.stringify(found));
-    sv({view:"home",lErr:""});
+    const fd=DB.users.find(u=>u.email===f.email&&u.password===f.password);
+    if(!fd)return sv({lErr:"メールアドレスまたはパスワードが違います"});
+    U=fd;sessionStorage.setItem(SSK,JSON.stringify(fd));sv({view:"home",lErr:""});
   }
 };
-window.doLogout=()=>{U=null;sessionStorage.removeItem(SESS);sv({view:"login",recipes:[...DB.recipes],ingMaster:[...DB.ingMaster]});};
+window.doLogout=()=>{U=null;sessionStorage.removeItem(SSK);sv({view:"login",recipes:[...DB.recipes],ingMaster:[...DB.ingMaster]});};
 window.ulf=(k,v)=>{V.lf={...V.lf,[k]:v};};
 window.toggleAuth=()=>sv({lf:{...V.lf,isNew:!V.lf.isNew},lErr:""});
 window.setStar=n=>sv({form:{...V.form,rating:n}});
 window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},fStep:1,aiState:"idle",aiMsg:""});
 window.uf=(k,v)=>{V.form={...V.form,[k]:v};render();};
 
-// ─── AI URL analyze ────────────────────────────────────────────────────────────
 window.handleUrl=async(url)=>{
   V.form={...V.form,url,source:dSrc(url)};
   if(!url||!url.startsWith("http")){sv({aiState:"idle",aiMsg:""});return;}
-  sv({aiState:"loading",aiMsg:"🤖 AIがURLを解析中..."});
+  sv({aiState:"loading",aiMsg:"解析しています..."});
   try{
-    const aIng=V.ingMaster.flatMap(c=>c.items);
-    const prompt=`レシピURLを分析してJSONのみ返してください（説明文なし）。\nURL: ${url}\n食材リスト: ${aIng.join("、")}\n\n{"title":"料理名","genre":"${GENRES.filter(g=>g!=="すべて").join("/")}のいずれか","memo":"分量とポイント2〜4行","ingredients":["食材1","食材2"],"tags":["タグ1"]}`;
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:prompt}]})});
-    const data=await res.json();
-    const text=data.content?.find(b=>b.type==="text")?.text||"";
-    const r=JSON.parse(text.replace(/```json|```/g,"").trim());
-    if(r){
-      const aI=V.ingMaster.flatMap(c=>c.items);
-      V.form={...V.form,title:r.title||V.form.title,genre:GENRES.includes(r.genre)?r.genre:"その他",memo:r.memo||V.form.memo,ingredients:(r.ingredients||[]).filter(i=>aI.includes(i)),tags:(r.tags||[]).join(", "),thumbnail:V.form.thumbnail||(dSrc(url)==="youtube"?ytT(url):"")||""};
-      sv({aiState:"done",aiMsg:"✅ AI自動入力完了！内容を確認してください"});
-    }else sv({aiState:"error",aiMsg:"⚠️ 解析できませんでした。手動で入力してください"});
-  }catch{sv({aiState:"error",aiMsg:"⚠️ AI解析エラー。手動で入力してください"});}
+    const aI=V.ingMaster.flatMap(c=>c.items);
+    const p=`レシピURLを分析してJSONのみ返してください（説明文なし）。\nURL: ${url}\n食材リスト: ${aI.join("、")}\n\n{"title":"料理名","genre":"${GENRES.filter(g=>g!=="すべて").join("/")}のいずれか","memo":"分量とポイント2〜4行","ingredients":["食材1"],"tags":["タグ1"]}`;
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:p}]})});
+    const d=await r.json();const t=d.content?.find(b=>b.type==="text")?.text||"";
+    const j=JSON.parse(t.replace(/```json|```/g,"").trim());
+    if(j){const aI2=V.ingMaster.flatMap(c=>c.items);V.form={...V.form,title:j.title||V.form.title,genre:GENRES.includes(j.genre)?j.genre:"その他",memo:j.memo||V.form.memo,ingredients:(j.ingredients||[]).filter(i=>aI2.includes(i)),tags:(j.tags||[]).join(", "),thumbnail:V.form.thumbnail||(dSrc(url)==="youtube"?ytT(url):"")||""};sv({aiState:"done",aiMsg:"自動入力が完了しました"});}
+    else sv({aiState:"error",aiMsg:"解析できませんでした。手動で入力してください"});
+  }catch{sv({aiState:"error",aiMsg:"エラーが発生しました。手動で入力してください"});}
 };
 
-// ─── Recipe CRUD ───────────────────────────────────────────────────────────────
+window.handleScreenshot=async(file)=>{
+  if(!file)return;
+  sv({aiState:"loading",aiMsg:"画像を解析しています..."});
+  try{
+    const b64=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result.split(",")[1]);r.readAsDataURL(file);});
+    V.form={...V.form,thumbnail:URL.createObjectURL(file)};
+    const aI=V.ingMaster.flatMap(c=>c.items);
+    const p=`この料理の画像を見てレシピ情報をJSONのみで返してください（説明文なし）。\n食材リスト: ${aI.join("、")}\n\n{"title":"料理名","genre":"${GENRES.filter(g=>g!=="すべて").join("/")}のいずれか","memo":"推定される主な材料と分量、調理のポイント2〜4行","ingredients":["食材1"],"tags":["タグ1"]}`;
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:[{type:"image",source:{type:"base64",media_type:file.type||"image/jpeg",data:b64}},{type:"text",text:p}]}]})});
+    const d=await r.json();const t=d.content?.find(b=>b.type==="text")?.text||"";
+    const j=JSON.parse(t.replace(/```json|```/g,"").trim());
+    if(j){const aI2=V.ingMaster.flatMap(c=>c.items);V.form={...V.form,title:j.title||V.form.title,genre:GENRES.includes(j.genre)?j.genre:"その他",memo:j.memo||V.form.memo,ingredients:(j.ingredients||[]).filter(i=>aI2.includes(i)),tags:(j.tags||[]).join(", ")};sv({aiState:"done",aiMsg:"画像の解析が完了しました"});}
+    else sv({aiState:"error",aiMsg:"解析できませんでした"});
+  }catch{sv({aiState:"error",aiMsg:"エラーが発生しました"});}
+};
+
+window.analyzeText=async()=>{
+  const txt=document.getElementById("ptxt")?.value||"";
+  if(!txt.trim())return;
+  sv({aiState:"loading",aiMsg:"テキストを解析しています..."});
+  try{
+    const aI=V.ingMaster.flatMap(c=>c.items);
+    const p=`以下のレシピテキストを分析してJSONのみ返してください（説明文なし）。\nテキスト:\n${txt}\n\n食材リスト: ${aI.join("、")}\n\n{"title":"料理名","genre":"${GENRES.filter(g=>g!=="すべて").join("/")}のいずれか","memo":"主な材料と分量、調理のポイント2〜4行","ingredients":["食材1"],"tags":["タグ1"]}`;
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:800,messages:[{role:"user",content:p}]})});
+    const d=await r.json();const t=d.content?.find(b=>b.type==="text")?.text||"";
+    const j=JSON.parse(t.replace(/```json|```/g,"").trim());
+    if(j){const aI2=V.ingMaster.flatMap(c=>c.items);V.form={...V.form,title:j.title||V.form.title,genre:GENRES.includes(j.genre)?j.genre:"その他",memo:j.memo||V.form.memo,ingredients:(j.ingredients||[]).filter(i=>aI2.includes(i)),tags:(j.tags||[]).join(", ")};sv({aiState:"done",aiMsg:"解析が完了しました"});}
+    else sv({aiState:"error",aiMsg:"解析できませんでした"});
+  }catch{sv({aiState:"error",aiMsg:"エラーが発生しました"});}
+};
+
 window.doSave=()=>{
-  if(!V.form.title.trim())return;
-  sv({saving:true});
-  const f=V.form;
-  const tags=f.tags.split(/[,、\s]+/).map(t=>t.trim()).filter(Boolean);
+  if(!V.form.title.trim())return;sv({saving:true});
+  const f=V.form;const tags=f.tags.split(/[,、\s]+/).map(t=>t.trim()).filter(Boolean);
   const th=f.thumbnail||(f.url&&dSrc(f.url)==="youtube"?ytT(f.url):"")||"";
   const data={title:f.title,genre:f.genre,source:f.source,url:f.url||"",memo:f.memo||"",tags,rating:f.rating,thumbnail:th,ingredients:f.ingredients};
   if(V.sel&&V.view==="edit"){
-    DB.recipes=DB.recipes.map(r=>r.id===V.sel.id?{...r,...data}:r);
-    dbSave(DB);const upd=DB.recipes.find(r=>r.id===V.sel.id);
-    sv({recipes:[...DB.recipes],sel:upd,view:"detail",saving:false,aiState:"idle",aiMsg:""});
+    DB.recipes=DB.recipes.map(r=>r.id===V.sel.id?{...r,...data}:r);dbs(DB);
+    sv({recipes:[...DB.recipes],sel:{...V.sel,...data},view:"detail",saving:false,aiState:"idle",aiMsg:""});
   }else{
     const nr={id:Date.now().toString(),...data,cookedCount:0,createdAt:Date.now()};
-    DB.recipes=[nr,...DB.recipes];dbSave(DB);
-    sv({recipes:[...DB.recipes],view:"home",saving:false,aiState:"idle",aiMsg:""});
+    DB.recipes=[nr,...DB.recipes];dbs(DB);sv({recipes:[...DB.recipes],view:"home",saving:false,aiState:"idle",aiMsg:""});
   }
 };
 window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:"detail"});};
-window.doCooked=()=>{
-  const r=V.sel;if(!r)return;
-  const nc=(r.cookedCount||0)+1;
-  DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbSave(DB);
-  sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});
-};
-window.doDelete=()=>{
-  const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;
-  DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbSave(DB);
-  sv({recipes:[...DB.recipes],view:"home",sel:null});
-};
-window.goEdit=()=>{
-  const r=V.sel;if(!r)return;
-  sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[]},fStep:1,aiState:"idle",aiMsg:""});
-};
-
-// ─── Ingredients ────────────────────────────────────────────────────────────────
+window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
+window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
+window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[]},fStep:1,aiState:"idle",aiMsg:""});};
 window.tFI=i=>sv({fIng:V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i]});
 window.tFmI=i=>{V.form={...V.form,ingredients:V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i]};render();};
-
-// ─── Category Manager ──────────────────────────────────────────────────────────
-window.addItem=catId=>{
-  const el=document.getElementById("nii_"+catId);if(!el||!el.value.trim())return;
-  const item=el.value.trim();el.value="";
-  V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:[...c.items,item]}:c);
-  DB.ingMaster=V.ingMaster;dbSave(DB);
-  V.cme=V.cme?.id===catId?{...V.cme,items:[...V.cme.items,item]}:V.cme;
-  render();
-};
-window.delItem=(catId,item)=>{
-  V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);
-  DB.ingMaster=V.ingMaster;dbSave(DB);
-  V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;
-  render();
-};
+window.addItem=catId=>{const el=document.getElementById("nii_"+catId);if(!el||!el.value.trim())return;const item=el.value.trim();el.value="";V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:[...c.items,item]}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:[...V.cme.items,item]}:V.cme;render();};
+window.delItem=(catId,item)=>{V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;render();};
 window.toggleCE=id=>sv({cme:V.cme?.id===id?null:V.ingMaster.find(c=>c.id===id)});
-window.delCat=id=>{if(!confirm("削除しますか？"))return;V.ingMaster=V.ingMaster.filter(c=>c.id!==id);DB.ingMaster=V.ingMaster;dbSave(DB);sv({ingMaster:V.ingMaster,cme:null});};
+window.delCat=id=>{if(!confirm("削除しますか？"))return;V.ingMaster=V.ingMaster.filter(c=>c.id!==id);DB.ingMaster=V.ingMaster;dbs(DB);sv({ingMaster:V.ingMaster,cme:null});};
 window.addCat=()=>{
   if(!V.cnn.trim())return;
-  const nc={id:"c_"+Date.now(),icon:V.cni,name:V.cnn.trim(),items:[]};
-  V.ingMaster=[...V.ingMaster,nc];DB.ingMaster=V.ingMaster;dbSave(DB);
+  const nc={id:"c_"+Date.now(),color:V.cncol,name:V.cnn.trim(),items:[]};
+  V.ingMaster=[...V.ingMaster,nc];DB.ingMaster=V.ingMaster;dbs(DB);
   sv({ingMaster:V.ingMaster,cnn:"",cmt:"list",cme:nc});
 };
 
-// ─── Ingredient Modal ──────────────────────────────────────────────────────────
-function ingModal(selected,onTog,onClose,activeCat,setAC){
-  const ac=activeCat||V.ingMaster[0]?.id;
+// 食材モーダル（カラードット付き）
+function iMod(sel,onT,onC,ac0,sAC){
+  const ac=ac0||V.ingMaster[0]?.id;
   const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];
-  return`<div class="modal-bg" onclick="if(event.target===this)${onClose}">
-    <div class="modal-box" onclick="event.stopPropagation()">
-      <div style="padding:16px 20px 12px;border-bottom:2px solid #F0DDD0;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-        <div><div style="font-weight:900;font-size:17px;color:#2D1B0E">🥕 食材を選ぶ</div><div style="font-size:12px;color:#C4A98A;margin-top:2px">選択中: ${selected.length}個</div></div>
-        <button class="btn" style="width:auto;padding:6px 18px;font-size:14px" onclick="${onClose}">完了</button>
+  return`<div class="mbg" onclick="if(event.target===this)${onC}"><div class="mbox" onclick="event.stopPropagation()">
+    <div style="padding:18px 20px 14px;border-bottom:1px solid var(--b3);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+      <div>
+        <div class="serif" style="font-size:17px;color:var(--br)">食材を選ぶ</div>
+        <div style="font-size:12px;color:var(--bl);margin-top:2px">${sel.length}品目 選択中</div>
       </div>
-      <div class="scroll-row" style="flex-shrink:0">${V.ingMaster.map(x=>chip(x.icon+" "+x.name,ac===x.id,`${setAC}('${x.id}')`)).join("")}</div>
-      <div style="overflow-y:auto;padding:14px 16px 20px;flex:1">
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          ${(cc?.items||[]).map(i=>{const on=selected.includes(i);return`<button class="chip${on?" on":""}" onclick="${onTog}('${i}')">${on?"✓ ":""}${i}</button>`;}).join("")}
-        </div>
-      </div>
-      ${selected.length>0?`<div style="padding:10px 16px 16px;border-top:2px solid #F0DDD0;flex-shrink:0"><div style="font-size:11px;color:#9C6E4A;margin-bottom:6px;font-weight:800">選択中</div><div style="display:flex;flex-wrap:wrap;gap:6px">${selected.map(i=>`<span style="background:#FFF5EE;border:2px solid #F0DDD0;border-radius:99px;padding:3px 10px;font-size:12px;color:${AC};font-weight:700;cursor:pointer" onclick="${onTog}('${i}')">${i} ✕</span>`).join("")}</div></div>`:""}
+      <button class="btn" style="width:auto;padding:8px 20px;font-size:14px" onclick="${onC}">完了</button>
     </div>
-  </div>`;
+    <!-- カテゴリタブ（カラードット付き） -->
+    <div class="srow" style="flex-shrink:0;gap:6px">
+      ${V.ingMaster.map(x=>`<button onclick="${sAC}('${x.id}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">
+        <span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}
+      </button>`).join("")}
+    </div>
+    <div style="overflow-y:auto;padding:14px 16px 20px;flex:1">
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${(cc?.items||[]).map(i=>{const on=sel.includes(i);return`<button onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+"66":"var(--b3)"};background:${on?cc.color+"18":"var(--wh)"};color:${on?cc.color:"var(--bm)"};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?"600":"400"};cursor:pointer">
+          <span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?"✓ ":""}${i}
+        </button>`;}).join("")}
+      </div>
+    </div>
+    ${sel.length>0?`<div style="padding:12px 16px 16px;border-top:1px solid var(--b3);flex-shrink:0">
+      <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1px">選択中の食材</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${sel.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||"var(--b4)";return`<span onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;background:${col}18;border:1px solid ${col}44;border-radius:99px;padding:4px 12px;font-size:12px;color:${col};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)} ×</span>`;}).join("")}</div>
+    </div>`:""}
+  </div></div>`;
 }
 
-// ─── Category Manager Modal ────────────────────────────────────────────────────
-function catMgrModal(){
-  const ICONS=["🍱","🧄","🧅","🥩","🫕","🥘","🍲","🥗","🍜","🧆","🥞","🍕","🌮","🍣","🧁","🍰","🥤","🌿","🫚","🫙"];
-  return`<div class="modal-bg" onclick="if(event.target===this)sv({showCM:false})">
-    <div class="modal-box" style="max-height:88vh" onclick="event.stopPropagation()">
-      <div style="padding:16px 20px 0;border-bottom:2px solid #F0DDD0;flex-shrink:0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font-weight:900;font-size:17px;color:#2D1B0E">⚙️ 食材カテゴリ管理</div>
-          <button class="btn" style="width:auto;padding:6px 18px;font-size:14px" onclick="sv({showCM:false})">閉じる</button>
-        </div>
-        <div style="display:flex">${["list","addcat"].map(t=>`<button onclick="sv({cmt:'${t}'})" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:${V.cmt===t?"3px solid "+AC:"3px solid transparent"};color:${V.cmt===t?AC:"#9C6E4A"};font-weight:800;cursor:pointer;font-size:13px">${t==="list"?"📋 一覧":"➕ 新規追加"}</button>`).join("")}</div>
+// カテゴリ管理モーダル
+function catMod(){
+  const COLORS=["#C85A3A","#8B3A2A","#D4844A","#3A6A8A","#D4A820","#4A7A3A","#7A5A3A","#A08A5A","#5A6A3A","#6A4A7A","#3A5A6A","#8A6A3A"];
+  return`<div class="mbg" onclick="if(event.target===this)sv({showCM:false})"><div class="mbox" style="max-height:88vh" onclick="event.stopPropagation()">
+    <div style="padding:18px 20px 0;border-bottom:1px solid var(--b3);flex-shrink:0">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="serif" style="font-size:17px;color:var(--br)">食材カテゴリ管理</div>
+        <button class="btn" style="width:auto;padding:8px 20px;font-size:14px" onclick="sv({showCM:false})">閉じる</button>
       </div>
-      <div style="overflow-y:auto;flex:1;padding:16px">
-        ${V.cmt==="list"?V.ingMaster.map(cat=>`
-          <div style="margin-bottom:12px;border:2px solid #F0DDD0;border-radius:16px;overflow:hidden">
-            <div onclick="toggleCE('${cat.id}')" style="background:${V.cme?.id===cat.id?"#FFF5EE":"#FFFAF7"};padding:10px 14px;display:flex;align-items:center;gap:8px;cursor:pointer">
-              <span style="font-size:20px">${cat.icon}</span>
-              <span style="font-weight:800;color:#2D1B0E;flex:1">${esc(cat.name)}</span>
-              <span style="font-size:11px;color:#C4A98A">${cat.items.length}品目</span>
-              ${cat.id.startsWith("c_")?`<button onclick="event.stopPropagation();delCat('${cat.id}')" style="background:#FFF0F0;color:#DC2626;border:none;border-radius:8px;padding:3px 8px;font-size:11px;cursor:pointer;font-weight:700">削除</button>`:""}
-              <span style="color:#C4A98A">${V.cme?.id===cat.id?"▲":"▼"}</span>
-            </div>
-            ${V.cme?.id===cat.id?`<div style="padding:10px 14px 14px;border-top:1px solid #F0DDD0">
-              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
-                ${cat.items.map(item=>`<span style="background:#FFF5EE;border:2px solid #F0DDD0;border-radius:99px;padding:3px 10px;font-size:12px;color:#2D1B0E;font-weight:600;display:inline-flex;align-items:center;gap:4px">${esc(item)}<span onclick="delItem('${cat.id}','${esc(item)}')" style="color:#DC2626;cursor:pointer;font-weight:900;font-size:13px">✕</span></span>`).join("")}
-              </div>
-              <div style="display:flex;gap:8px">
-                <input id="nii_${cat.id}" class="fi" placeholder="食材名を入力..." onkeydown="if(event.key==='Enter')addItem('${cat.id}')" style="flex:1">
-                <button class="btn" style="width:auto;padding:8px 14px;font-size:14px" onclick="addItem('${cat.id}')">追加</button>
-              </div>
-            </div>`:""}
-          </div>`).join(""):
-        `<div>
-          <label class="lbl">アイコン</label>
-          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${ICONS.map(ic=>`<button onclick="sv({cni:'${ic}'})" style="background:${V.cni===ic?AC:"#FFF5EE"};border:${V.cni===ic?"none":"2px solid #F0DDD0"};border-radius:10px;padding:6px 10px;font-size:20px;cursor:pointer;line-height:1">${ic}</button>`).join("")}</div>
-          <label class="lbl">カテゴリ名</label>
-          <input class="fi" placeholder="例：スパイス、調味料..." value="${esc(V.cnn)}" oninput="sv({cnn:this.value})" style="margin-bottom:12px">
-          <div style="background:#FFF5EE;border-radius:14px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px">
-            <span style="font-size:28px">${V.cni}</span><span style="font-weight:800;color:#2D1B0E;font-size:16px">${esc(V.cnn)||"カテゴリ名"}</span>
+      <div style="display:flex">${["list","addcat"].map(t=>`<button onclick="sv({cmt:'${t}'})" style="flex:1;padding:8px 0;background:none;border:none;border-bottom:${V.cmt===t?"2px solid var(--am)":"2px solid transparent"};color:${V.cmt===t?"var(--am)":"var(--bl)"};font-weight:600;cursor:pointer;font-size:13px;letter-spacing:.3px">${t==="list"?"カテゴリ一覧":"新規追加"}</button>`).join("")}</div>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:16px">
+      ${V.cmt==="list"?V.ingMaster.map(cat=>`
+        <div style="margin-bottom:10px;border:1px solid var(--b3);border-radius:14px;overflow:hidden">
+          <div onclick="toggleCE('${cat.id}')" style="background:${V.cme?.id===cat.id?"var(--b2)":"var(--wh)"};padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="width:10px;height:10px;border-radius:50%;background:${cat.color};flex-shrink:0;display:inline-block"></span>
+            <span style="font-weight:500;color:var(--br);flex:1;font-size:14px">${esc(cat.name)}</span>
+            <span style="font-size:12px;color:var(--bl)">${cat.items.length}品目</span>
+            ${cat.id.startsWith("c_")?`<button onclick="event.stopPropagation();delCat('${cat.id}')" style="background:var(--rdp);color:var(--rd);border:none;border-radius:8px;padding:3px 10px;font-size:11px;cursor:pointer;font-weight:600">削除</button>`:""}
+            <span style="color:var(--b4);font-size:12px">${V.cme?.id===cat.id?"▲":"▼"}</span>
           </div>
-          <button class="btn" ${!V.cnn.trim()?"disabled":""} onclick="addCat()">➕ このカテゴリを追加する</button>
-        </div>`}
-      </div>
+          ${V.cme?.id===cat.id?`<div style="padding:12px 14px 14px;border-top:1px solid var(--b3);background:var(--b1)">
+            <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+              ${cat.items.map(item=>`<span style="display:inline-flex;align-items:center;gap:5px;background:var(--wh);border:1px solid var(--b3);border-radius:99px;padding:4px 10px;font-size:12px;color:var(--bm)">
+                <span style="width:5px;height:5px;border-radius:50%;background:${cat.color};display:inline-block;flex-shrink:0"></span>
+                ${esc(item)}<span onclick="delItem('${cat.id}','${esc(item)}')" style="color:var(--rd);cursor:pointer;font-weight:700;margin-left:2px">×</span>
+              </span>`).join("")}
+            </div>
+            <div style="display:flex;gap:8px"><input id="nii_${cat.id}" class="fi" placeholder="食材名を入力..." onkeydown="if(event.key==='Enter')addItem('${cat.id}')" style="flex:1;padding:10px 12px;font-size:14px"><button class="btn" style="width:auto;padding:10px 16px;font-size:13px" onclick="addItem('${cat.id}')">追加</button></div>
+          </div>`:""}
+        </div>`).join(""):
+      `<div>
+        <label class="lbl">カテゴリカラー</label>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+          ${COLORS.map(col=>`<button onclick="sv({cncol:'${col}'})" style="width:32px;height:32px;border-radius:50%;background:${col};border:${V.cncol===col?"3px solid var(--br)":"2px solid transparent"};cursor:pointer;box-shadow:${V.cncol===col?"0 0 0 2px var(--wh) inset":"none"}"></button>`).join("")}
+        </div>
+        <label class="lbl">カテゴリ名</label>
+        <input class="fi" placeholder="例：スパイス、調味料、乾物..." value="${esc(V.cnn)}" oninput="sv({cnn:this.value})" style="margin-bottom:14px">
+        <div style="background:var(--wh);border-radius:12px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--b3);display:flex;align-items:center;gap:10px">
+          <span style="width:12px;height:12px;border-radius:50%;background:${V.cncol};display:inline-block;flex-shrink:0"></span>
+          <span style="font-weight:500;color:var(--br);font-size:15px">${esc(V.cnn)||"カテゴリ名"}</span>
+        </div>
+        <button class="btn" ${!V.cnn.trim()?"disabled":""} onclick="addCat()">このカテゴリを追加する</button>
+      </div>`}
     </div>
-  </div>`;
+  </div></div>`;
 }
 
-// ─── Views ────────────────────────────────────────────────────────────────────
 function filtered(){
   return V.recipes
     .filter(r=>V.fGenre==="すべて"||r.genre===V.fGenre)
@@ -284,176 +365,320 @@ function filtered(){
     .sort((a,b)=>V.sort==="newest"?b.createdAt-a.createdAt:V.sort==="rating"?(b.rating||0)-(a.rating||0):(b.cookedCount||0)-(a.cookedCount||0));
 }
 
+// ── Views ──────────────────────────────────────────────────────────────────────
+
 function vLogin(){return`
-  <div style="min-height:100vh;background:linear-gradient(160deg,#FFF1E6,#FFE4CC,#F9D4B6);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px">
-    <div style="font-size:56px;margin-bottom:8px">🍳</div>
-    <div style="background:#fff;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,.10)">
-      <div style="font-size:24px;font-weight:900;color:#2D1B0E;text-align:center;margin-bottom:4px">My Recipe Book</div>
-      <div style="font-size:13px;color:#9C6E4A;text-align:center;margin-bottom:20px">${V.lf.isNew?"アカウントを作成":"おかえりなさい"}</div>
-      ${V.lf.isNew?`<input class="fi" placeholder="お名前" value="${esc(V.lf.name)}" oninput="ulf('name',this.value)" style="margin-bottom:10px">`:""}
-      <input class="fi" placeholder="メールアドレス" type="email" value="${esc(V.lf.email)}" oninput="ulf('email',this.value)" style="margin-bottom:10px">
-      <input class="fi" placeholder="パスワード（6文字以上）" type="password" value="${esc(V.lf.password)}" oninput="ulf('password',this.value)" style="margin-bottom:10px">
-      ${V.lErr?`<div style="color:${AC};font-size:13px;margin-bottom:10px;font-weight:700">${esc(V.lErr)}</div>`:""}
-      <button class="btn" onclick="doAuth()">${V.lf.isNew?"🎉 登録する":"🔑 ログイン"}</button>
-      <button class="btn sec" style="margin-top:10px" onclick="toggleAuth()">${V.lf.isNew?"すでにアカウントをお持ちの方":"新規登録はこちら"}</button>
-      <div style="margin-top:14px;font-size:11px;color:#C4A98A;text-align:center">※ このブラウザにデータが保存されます</div>
+  <div style="min-height:100vh;background:linear-gradient(170deg,var(--b1) 0%,var(--b2) 60%,var(--b3) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px">
+    <div style="margin-bottom:24px;text-align:center">
+      <div style="display:inline-flex;align-items:center;gap:8px;margin-bottom:10px">
+        <span style="display:inline-block;width:28px;height:2px;background:var(--am)"></span>
+        <span class="serif" style="font-size:11px;color:var(--am);letter-spacing:4px;font-style:italic">Kitchen Garden</span>
+        <span style="display:inline-block;width:28px;height:2px;background:var(--am)"></span>
+      </div>
+    </div>
+    <div style="background:var(--wh);border-radius:20px;padding:40px 30px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(61,46,30,.10);border:1px solid var(--b3)">
+      <div class="serif" style="font-size:26px;color:var(--br);text-align:center;margin-bottom:8px">My Recipe Book</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px">
+        <span style="display:inline-block;width:20px;height:1px;background:var(--b3)"></span>
+        <span style="font-size:11px;color:var(--bl);letter-spacing:.5px">${V.lf.isNew?"アカウントを作成":"おかえりなさい"}</span>
+        <span style="display:inline-block;width:20px;height:1px;background:var(--b3)"></span>
+      </div>
+      ${V.lf.isNew?`<input class="fi" placeholder="お名前" value="${esc(V.lf.name)}" oninput="ulf('name',this.value)" style="margin-bottom:12px">`:""}
+      <input class="fi" placeholder="メールアドレス" type="email" value="${esc(V.lf.email)}" oninput="ulf('email',this.value)" style="margin-bottom:12px">
+      <input class="fi" placeholder="パスワード（6文字以上）" type="password" value="${esc(V.lf.password)}" oninput="ulf('password',this.value)" style="margin-bottom:12px">
+      ${V.lErr?`<div style="color:var(--rd);font-size:13px;margin-bottom:12px;background:var(--rdp);padding:10px 14px;border-radius:10px;border:1px solid #DDB8B0">${esc(V.lErr)}</div>`:""}
+      <button class="btn" onclick="doAuth()" style="margin-bottom:10px">${V.lf.isNew?"登録する":"ログイン"}</button>
+      <button class="btn sec" onclick="toggleAuth()">${V.lf.isNew?"すでにアカウントをお持ちの方":"新規登録はこちら"}</button>
+      <div style="margin-top:20px;font-size:11px;color:var(--b4);text-align:center;letter-spacing:.3px">データはこのブラウザに保存されます</div>
     </div>
   </div>`;}
 
 function vHome(){
   const fl=filtered();
   return`<div style="display:flex;flex-direction:column;min-height:100vh">
-    <div style="background:#fff;padding:14px 16px 10px;border-bottom:2px solid #F0DDD0;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between">
-      <div><div style="font-size:19px;font-weight:900;color:${AC}">🍳 My Recipe Book</div><div style="font-size:11px;color:#C4A98A">こんにちは、${esc(U?.name||U?.email||"")}さん</div></div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <select onchange="sv({sort:this.value})" style="border:2px solid #F0DDD0;border-radius:10px;padding:5px 8px;font-size:12px;color:#9C6E4A;background:#FFFAF7">
-          <option value="newest" ${V.sort==="newest"?"selected":""}>新着順</option>
-          <option value="rating" ${V.sort==="rating"?"selected":""}>評価順</option>
-          <option value="cooked" ${V.sort==="cooked"?"selected":""}>よく作る</option>
-        </select>
-        <button onclick="doLogout()" style="background:none;border:2px solid #F0DDD0;border-radius:10px;padding:5px 10px;font-size:11px;color:#9C6E4A;cursor:pointer">ログアウト</button>
-      </div>
-    </div>
-    <div style="background:#fff;padding:10px 16px;border-bottom:1px solid #F0DDD0;display:flex;gap:8px">
-      <div style="position:relative;flex:1">
-        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;color:#C4A98A">🔍</span>
-        <input placeholder="レシピ名・食材・タグで検索..." value="${esc(V.q)}" oninput="sv({q:this.value})" style="width:100%;padding:10px 14px 10px 34px;border:2px solid #F0DDD0;border-radius:99px;font-size:16px;background:#FFFAF7;outline:none;box-sizing:border-box;color:#2D1B0E">
-      </div>
-      <button onclick="sv({showIM:true})" style="background:${V.fIng.length>0?AC:"#FFF5EE"};color:${V.fIng.length>0?"#fff":AC};border:2px solid ${V.fIng.length>0?AC:"#F0DDD0"};border-radius:99px;padding:0 14px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap">🥕${V.fIng.length>0?" "+V.fIng.length:""}</button>
-    </div>
-    ${V.fIng.length>0?`<div style="background:#FFF5EE;padding:8px 16px;border-bottom:1px solid #F0DDD0;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:11px;color:#9C6E4A;font-weight:800">🥕 食材で絞り込み中:</span>${V.fIng.map(i=>`<span style="background:#fff;border:2px solid ${AC};border-radius:99px;padding:2px 8px;font-size:11px;color:${AC};font-weight:700;cursor:pointer" onclick="tFI('${i}')">${i} ✕</span>`).join("")}<button onclick="sv({fIng:[]})" style="background:none;border:none;font-size:11px;color:#C4A98A;cursor:pointer;margin-left:auto">全クリア</button></div>`:""}
-    <div class="scroll-row" style="background:#FFFAF7">${chip("すべて",V.fSrc==="all","sv({fSrc:'all'})")}${SOURCES.map(s=>chip(s.emoji+" "+s.label,V.fSrc===s.id,"sv({fSrc:'"+s.id+"'})")).join("")}</div>
-    <div class="scroll-row">${GENRES.map(g=>chip(g,V.fGenre===g,"sv({fGenre:'"+g.replace(/'/g,"\\'")+"'})")).join("")}</div>
-    <div style="background:#FFF5EE;padding:8px 16px;border-bottom:1px solid #F0DDD0;font-size:12px;color:#9C6E4A">📚 <b>${V.recipes.length}</b>件 / 表示中: <b>${fl.length}</b>件</div>
-    <div style="flex:1;padding:12px;padding-bottom:80px">
-      ${fl.length===0?`<div style="text-align:center;padding:60px 20px;color:#C4A98A"><div style="font-size:44px;margin-bottom:12px">🍽️</div><div style="font-size:16px;font-weight:700">レシピがありません</div><div style="font-size:13px;margin-top:6px">右下の ＋ から追加しましょう</div></div>`:
-      `<div class="grid2">${fl.map(r=>`<div class="card" onclick="openDetail('${r.id}')">
-        ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:#F5E6D8;display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:#F5E6D8;display:flex;align-items:center;justify-content:center;font-size:36px">🍽️</div>`}
-        <div style="padding:10px 12px 12px">
-          <div style="font-size:13px;font-weight:800;color:#2D1B0E;margin-bottom:4px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div>
-          <div style="margin-bottom:4px">${badge(r.source,true)}</div>
-          <div>${stars(r.rating,false)}</div>
-          ${V.fIng.length>0&&(r.ingredients||[]).some(i=>V.fIng.includes(i))?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">${(r.ingredients||[]).filter(i=>V.fIng.includes(i)).map(i=>`<span style="background:${AC};color:#fff;border-radius:99px;padding:1px 6px;font-size:9px;font-weight:800">✓ ${esc(i)}</span>`).join("")}</div>`:""}
+    <!-- ヘッダー：山吹色ラインが下部に -->
+    <div style="background:var(--br);padding:16px 16px 0;position:sticky;top:0;z-index:100">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
+        <div>
+          <div class="serif" style="font-size:20px;color:var(--wh);letter-spacing:.5px">My Recipe Book</div>
+          <div style="font-size:11px;color:var(--b4);margin-top:1px;letter-spacing:.3px">${esc(U?.name||"")}さんのレシピ帳</div>
         </div>
-      </div>`).join("")}</div>`}
+        <div style="display:flex;gap:8px;align-items:center">
+          <select onchange="sv({sort:this.value})" style="border:1px solid rgba(255,252,248,.2);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--b2);background:rgba(255,252,248,.1)">
+            <option value="newest" ${V.sort==="newest"?"selected":""}>新着順</option>
+            <option value="rating" ${V.sort==="rating"?"selected":""}>評価順</option>
+            <option value="cooked" ${V.sort==="cooked"?"selected":""}>よく作る順</option>
+          </select>
+          <button onclick="doLogout()" style="background:rgba(255,252,248,.1);border:1px solid rgba(255,252,248,.2);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--b3);cursor:pointer">ログアウト</button>
+        </div>
+      </div>
+      <!-- 山吹色アクセントライン -->
+      <div style="height:2px;background:linear-gradient(90deg,var(--am),var(--al),transparent)"></div>
     </div>
-    <button class="fab" onclick="goAdd()">+</button>
+
+    <!-- 検索バー -->
+    <div style="background:var(--wh);padding:10px 16px;border-bottom:1px solid var(--b3);display:flex;gap:8px">
+      <div style="position:relative;flex:1">
+        <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--b4)">◎</span>
+        <input placeholder="レシピ名・食材・タグで検索" value="${esc(V.q)}" oninput="sv({q:this.value})" style="width:100%;padding:10px 14px 10px 34px;border:1px solid var(--b3);border-radius:99px;font-size:15px;background:var(--b1);outline:none;box-sizing:border-box;color:var(--br)">
+      </div>
+      <button onclick="sv({showIM:true})" style="background:${V.fIng.length>0?"var(--am)":"var(--b2)"};color:${V.fIng.length>0?"var(--wh)":"var(--bm)"};border:1px solid ${V.fIng.length>0?"var(--am)":"var(--b3)"};border-radius:99px;padding:0 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;letter-spacing:.3px">食材${V.fIng.length>0?" · "+V.fIng.length:""}</button>
+    </div>
+
+    <!-- 食材フィルター表示 -->
+    ${V.fIng.length>0?`<div style="background:var(--ap);padding:8px 16px;border-bottom:1px solid var(--am)30;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:10px;color:var(--ad);font-weight:700;letter-spacing:.8px">食材絞り込み中</span>
+      ${V.fIng.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--wh);border:1px solid ${col}44;border-radius:99px;padding:3px 10px;font-size:11px;color:${col};cursor:pointer" onclick="tFI('${i}')"><span style="width:5px;height:5px;border-radius:50%;background:${col};display:inline-block"></span>${esc(i)} ×</span>`;}).join("")}
+      <button onclick="sv({fIng:[]})" style="background:none;border:none;font-size:11px;color:var(--bl);cursor:pointer;margin-left:auto;letter-spacing:.3px">クリア</button>
+    </div>`:""}
+
+    <div class="srow">${chip("すべて",V.fSrc==="all","sv({fSrc:'all'})")}${SOURCES.map(s=>chip(s.label,V.fSrc===s.id,"sv({fSrc:'"+s.id+"'})")).join("")}</div>
+    <div class="srow">${GENRES.map(g=>chip(g,V.fGenre===g,"sv({fGenre:'"+g.replace(/'/g,"\\'")+`'})`)).join("")}</div>
+
+    <div style="background:var(--b2);padding:7px 16px;border-bottom:1px solid var(--b3);font-size:11px;color:var(--bl);letter-spacing:.3px">${V.recipes.length}件のレシピ　·　表示中 ${fl.length}件</div>
+
+    <div style="flex:1;padding:14px;padding-bottom:84px">
+      ${fl.length===0?`<div style="text-align:center;padding:64px 20px;color:var(--bl)">
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px">
+          <span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span>
+          <span class="serif" style="font-size:15px;color:var(--b4);font-style:italic">No Recipes Yet</span>
+          <span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span>
+        </div>
+        <div style="font-size:13px;color:var(--bl)">右下のボタンからレシピを追加してください</div>
+      </div>`:`
+      <div class="g2">${fl.map(r=>{
+        const mainIng=r.ingredients?.[0];const cat=V.ingMaster.find(c=>c.items.includes(mainIng));const accentColor=cat?.color||"var(--b3)";
+        return`<div class="card" onclick="openDetail('${r.id}')">
+          <div style="position:relative">
+            ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--b2);display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+              <div style="display:flex;gap:4px">${(r.ingredients||[]).slice(0,3).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:10px;height:10px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div>
+              <span class="serif" style="font-size:11px;color:var(--b4);font-style:italic">${esc(r.genre)}</span>
+            </div>`}
+            <!-- 食材カテゴリカラーの左ボーダー -->
+            <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${accentColor};opacity:.8"></div>
+          </div>
+          <div style="padding:10px 12px 12px">
+            <div style="font-size:13px;font-weight:600;color:var(--br);margin-bottom:5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div>
+            <div style="margin-bottom:5px">${badge(r.source,true)}</div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              ${stars(r.rating,false)}
+              ${r.cookedCount>0?`<span style="font-size:10px;color:var(--bl);letter-spacing:.3px">${r.cookedCount}回</span>`:""}
+            </div>
+            ${V.fIng.length>0&&(r.ingredients||[]).some(i=>V.fIng.includes(i))?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">${(r.ingredients||[]).filter(i=>V.fIng.includes(i)).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col2=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:3px;background:${col2}18;border:1px solid ${col2}44;border-radius:99px;padding:1px 7px;font-size:9px;color:${col2};font-weight:600"><span style="width:4px;height:4px;border-radius:50%;background:${col2};display:inline-block"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
+          </div>
+        </div>`;}).join("")}</div>`}
+    </div>
+
+    <button class="fab" onclick="goAdd()" title="レシピを追加">＋</button>
     ${navBar("home")}
-    ${V.showIM?ingModal(V.fIng,"tFI","sv({showIM:false})",V.imc,"sv({imc:"):""}
+    ${V.showIM?iMod(V.fIng,"tFI","sv({showIM:false})",V.imc,"sv({imc:"):""}
   </div>`;}
 
 function vDetail(){
   const r=V.sel;if(!r)return"";
-  return`<div style="min-height:100vh;position:relative">
-    ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`:`<div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#F5E6D8,#E8C9A8);display:flex;align-items:center;justify-content:center;font-size:64px">🍽️</div>`}
-    <button onclick="sv({view:'home'})" style="position:absolute;top:12px;left:12px;background:rgba(0,0,0,.45);border:none;border-radius:99px;color:#fff;width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10">←</button>
-    <div style="padding:18px 16px;padding-bottom:30px">
-      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+  const mainIng=r.ingredients?.[0];const cat=V.ingMaster.find(c=>c.items.includes(mainIng));const accentColor=cat?.color||"var(--b3)";
+  return`<div style="min-height:100vh;position:relative;background:var(--b1)">
+    <div style="position:relative">
+      ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`:`<div style="width:100%;aspect-ratio:16/9;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px">
+        <div style="display:flex;gap:6px">${(r.ingredients||[]).slice(0,4).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:14px;height:14px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div>
+        <span class="serif" style="font-size:18px;color:var(--b4);font-style:italic">${esc(r.genre)}</span>
+      </div>`}
+      <button onclick="sv({view:'home'})" style="position:absolute;top:14px;left:14px;background:rgba(30,18,8,.55);border:none;border-radius:99px;color:var(--wh);width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
+      <!-- 山吹色ライン -->
+      <div style="height:2px;background:linear-gradient(90deg,${accentColor},var(--am),transparent)"></div>
+    </div>
+
+    <div style="padding:20px 18px 40px">
+      <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
         <div style="flex:1">
-          <h1 style="font-size:22px;font-weight:900;color:#2D1B0E;margin:0;line-height:1.2">${esc(r.title)}</h1>
-          <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badge(r.source,false)}<span style="background:#F5E6D8;color:#9C6E4A;border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700">${esc(r.genre)}</span></div>
+          <h1 class="serif" style="font-size:22px;color:var(--br);margin:0;line-height:1.25;font-weight:600">${esc(r.title)}</h1>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+            ${badge(r.source,false)}
+            <span style="background:var(--b2);color:var(--bm);border:1px solid var(--b3);border-radius:4px;padding:3px 10px;font-size:11px">${esc(r.genre)}</span>
+          </div>
         </div>
-        <div style="text-align:right"><div>${stars(r.rating,false)}</div><div style="font-size:11px;color:#C4A98A;margin-top:4px">作った: <b>${r.cookedCount||0}回</b></div></div>
+        <div style="text-align:right;flex-shrink:0">
+          ${stars(r.rating,false)}
+          <div style="font-size:11px;color:var(--bl);margin-top:4px;letter-spacing:.3px">${r.cookedCount||0}回 調理済</div>
+        </div>
       </div>
-      ${(r.ingredients||[]).length>0?`<div style="background:#FFF5EE;border-radius:14px;padding:12px 14px;margin-bottom:14px;border:2px solid #F0DDD0"><div style="font-size:11px;font-weight:800;color:#9C6E4A;margin-bottom:8px">🥕 使っている食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${r.ingredients.map(i=>`<span style="background:#fff;border:2px solid #F0DDD0;border-radius:99px;padding:3px 10px;font-size:12px;color:${AC};font-weight:700">${esc(i)}</span>`).join("")}</div></div>`:""}
-      ${(r.tags||[]).length>0?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${r.tags.map(t=>`<span style="background:#FFF5EE;border:1px solid #F0DDD0;border-radius:99px;padding:3px 10px;font-size:11px;color:#9C6E4A;font-weight:600">#${esc(t)}</span>`).join("")}</div>`:""}
-      ${r.memo?`<div style="background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;border:2px solid #F0DDD0"><div style="font-size:11px;font-weight:800;color:#9C6E4A;margin-bottom:8px">📝 MEMO · 分量 · ポイント</div><div style="font-size:15px;color:#2D1B0E;line-height:1.7;white-space:pre-wrap">${esc(r.memo)}</div></div>`:""}
-      ${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noreferrer" style="display:block;background:#FFF5EE;border-radius:16px;padding:12px 16px;text-decoration:none;border:2px solid #F0DDD0;margin-bottom:14px;color:${AC};font-size:14px;font-weight:700">🔗 元のレシピを開く</a>`:""}
+
+      <!-- 食材 -->
+      ${(r.ingredients||[]).length>0?`<div style="background:var(--wh);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--b3)">
+        <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:10px;letter-spacing:1.5px">使っている食材</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">${r.ingredients.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1px solid ${col}30;border-radius:99px;padding:5px 12px;font-size:12px;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)}</span>`;}).join("")}</div>
+      </div>`:""}
+
+      ${(r.tags||[]).length>0?`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">${r.tags.map(t=>`<span style="border:1px solid var(--b3);border-radius:4px;padding:3px 10px;font-size:11px;color:var(--bl)"># ${esc(t)}</span>`).join("")}</div>`:""}
+
+      ${r.memo?`<div style="background:var(--wh);border-radius:14px;padding:16px;margin-bottom:14px;border:1px solid var(--b3);border-left:3px solid var(--am)">
+        <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:10px;letter-spacing:1.5px">MEMO — 分量とポイント</div>
+        <div style="font-size:14px;color:var(--br);line-height:1.9;white-space:pre-wrap;font-weight:300">${esc(r.memo)}</div>
+      </div>`:""}
+
+      ${r.url?`<a href="${esc(r.url)}" target="_blank" rel="noreferrer" style="display:flex;align-items:center;gap:8px;background:var(--wh);border-radius:12px;padding:13px 16px;text-decoration:none;border:1px solid var(--b3);margin-bottom:14px;color:var(--am);font-size:13px;font-weight:600;letter-spacing:.2px">
+        <span style="font-size:14px;color:var(--am)">→</span>元のレシピを開く
+      </a>`:""}
+
       <div style="display:flex;gap:10px;margin-bottom:10px">
-        <button class="btn" style="flex:2" onclick="doCooked()">🍳 作った！(${r.cookedCount||0}回)</button>
-        <button class="btn sec" style="flex:1" onclick="goEdit()">✏️ 編集</button>
+        <button class="btn" style="flex:2" onclick="doCooked()">調理済にする（${r.cookedCount||0}回）</button>
+        <button class="btn sec" style="flex:1" onclick="goEdit()">編集</button>
       </div>
-      <button class="btn danger" onclick="doDelete()">🗑️ 削除</button>
+      <button class="btn danger" onclick="doDelete()">削除する</button>
     </div>
   </div>`;}
 
 function vAdd(){
   const f=V.form;const isE=V.view==="edit";
   const th=f.thumbnail||(f.url&&dSrc(f.url)==="youtube"?ytT(f.url):"")||"";
-  return`<div style="min-height:100vh;display:flex;flex-direction:column">
-    <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #F0DDD0;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100">
-      <button onclick="sv({view:${isE?"'detail'":"'home'"}})" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9C6E4A">←</button>
-      <div style="font-weight:900;font-size:17px;color:#2D1B0E;flex:1">${isE?"✏️ レシピを編集":"✨ レシピを追加"}</div>
-      <div style="font-size:13px;color:#C4A98A">STEP ${V.fStep}/2</div>
+  const aiColor=V.aiState==="loading"?"var(--bm)":V.aiState==="done"?"#3A6A30":"var(--rd)";
+  const aiBg=V.aiState==="loading"?"var(--b2)":V.aiState==="done"?"#EEF5EA":"var(--rdp)";
+  return`<div style="min-height:100vh;display:flex;flex-direction:column;background:var(--b1)">
+    <div style="background:var(--br);padding:16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100">
+      <button onclick="sv({view:${isE?"'detail'":"'home'"}})" style="background:rgba(255,252,248,.15);border:none;cursor:pointer;color:var(--wh);width:36px;height:36px;border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:18px">←</button>
+      <div class="serif" style="font-size:17px;color:var(--wh);flex:1;letter-spacing:.3px">${isE?"レシピを編集":"レシピを追加"}</div>
+      <div style="font-size:11px;color:var(--b4);letter-spacing:.8px">STEP ${V.fStep} / 2</div>
     </div>
-    <div style="height:4px;background:#F0DDD0"><div style="height:4px;background:${AC};width:${V.fStep===1?"50%":"100%"};transition:width .3s"></div></div>
-    <div style="padding:16px;flex:1;padding-bottom:20px">
+    <!-- 山吹色プログレスバー -->
+    <div style="height:3px;background:var(--b3)"><div style="height:3px;background:var(--am);width:${V.fStep===1?"50%":"100%"};transition:width .3s"></div></div>
+
+    <div style="padding:18px 16px;flex:1;padding-bottom:24px">
       ${V.fStep===1?`
-        <div style="background:linear-gradient(135deg,#FFF5EE,#FFE4D0);border:2px solid #F0DDD0;border-radius:18px;padding:16px;margin-bottom:16px">
-          <div style="font-size:13px;font-weight:900;color:#2D1B0E;margin-bottom:4px">🤖 URLを貼るだけで自動入力！</div>
-          <div style="font-size:11px;color:#9C6E4A;margin-bottom:10px">YouTube・クックパッドなどのURLを入れるとAIが自動で埋めます</div>
-          <input class="fi" placeholder="https://... URLを貼り付け" value="${esc(f.url)}" oninput="handleUrl(this.value)">
-          ${V.aiState!=="idle"?`<div style="margin-top:8px;padding:8px 12px;border-radius:10px;background:${V.aiState==="loading"?"#FFF5EE":V.aiState==="done"?"#F0FDF4":"#FFF0F0"};font-size:12px;font-weight:700;color:${V.aiState==="loading"?AC:V.aiState==="done"?"#16A34A":"#DC2626"}">${V.aiMsg}</div>`:""}
-        </div>
-        ${th?`<img src="${esc(th)}" style="width:100%;border-radius:16px;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px">`:""}
-        <div style="margin-bottom:14px"><label class="lbl">レシピ名 *</label><input class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-          <div><label class="lbl">ジャンル</label><select class="fi" onchange="uf('genre',this.value)">${GENRES.filter(g=>g!=="すべて").map(g=>`<option ${f.genre===g?"selected":""}>${g}</option>`).join("")}</select></div>
-          <div><label class="lbl">参照元</label><select class="fi" onchange="uf('source',this.value)">${SOURCES.map(s=>`<option value="${s.id}" ${f.source===s.id?"selected":""}>${s.emoji} ${s.label}</option>`).join("")}</select></div>
-        </div>
-        <button class="btn" ${(!f.title.trim()||V.aiState==="loading")?"disabled":""} onclick="if(document.querySelector('.btn:not(:disabled)')){sv({fStep:2})}">${V.aiState==="loading"?"🤖 AI解析中...":"次へ →"}</button>
-      `:`
-        <div style="background:#FFF5EE;border-radius:16px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px">
-          ${th?`<img src="${esc(th)}" style="width:56px;height:56px;border-radius:12px;object-fit:cover">`:""}
-          <div><div style="font-weight:900;color:#2D1B0E;font-size:15px">${esc(f.title)}</div><div style="margin-top:4px">${badge(f.source,true)}</div></div>
-        </div>
-        <div style="margin-bottom:14px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-            <label class="lbl" style="margin-bottom:0">🥕 使っている食材</label>
-            <button onclick="sv({showCM:true})" style="background:none;border:none;color:#9C6E4A;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ カテゴリ管理</button>
+        <!-- AI入力セクション -->
+        <div style="background:var(--wh);border:1px solid var(--b3);border-radius:16px;padding:18px;margin-bottom:18px;border-top:2px solid var(--am)">
+          <div class="serif" style="font-size:15px;color:var(--br);margin-bottom:14px">AI による自動入力</div>
+
+          <div style="background:#FDF7E3;border:1px solid #E0C860;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:#7A6010;line-height:1.7;letter-spacing:.2px">
+            Instagram・TikTok・Reels・YouTubeショートはURLでは解析できません。②か③をご利用ください。
           </div>
-          <button onclick="sv({showFI:true})" style="width:100%;padding:12px 14px;border:2px solid #F0DDD0;border-radius:12px;font-size:15px;background:#FFFAF7;color:${AC};font-weight:800;cursor:pointer;text-align:left;margin-bottom:8px">＋ 食材を選ぶ（${f.ingredients.length}個）</button>
-          ${f.ingredients.length>0?`<div style="display:flex;flex-wrap:wrap;gap:6px">${f.ingredients.map(i=>`<span style="background:#FFF5EE;border:2px solid #F0DDD0;border-radius:99px;padding:3px 10px;font-size:12px;color:${AC};font-weight:700">🥕 ${esc(i)}</span>`).join("")}</div>`:""}
+
+          <div style="border:1px solid var(--b3);border-radius:12px;padding:12px 14px;margin-bottom:10px">
+            <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1.5px">① URL から取得</div>
+            <div style="font-size:11px;color:var(--bl);margin-bottom:8px">YouTube · クックパッド · クラシル · 一般 Web サイト</div>
+            <input class="fi" placeholder="https://..." value="${esc(f.url)}" oninput="handleUrl(this.value)" style="font-size:14px;padding:10px 12px;background:var(--b1)">
+          </div>
+
+          <div style="border:1px solid #C2185B28;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--b1)">
+            <div style="font-size:10px;font-weight:700;color:#C2185B;margin-bottom:6px;letter-spacing:1.5px">② スクリーンショットから解析</div>
+            <div style="font-size:11px;color:var(--bl);margin-bottom:8px">Instagram · TikTok · Reels · YouTube ショートなどの動画全般</div>
+            <input type="file" accept="image/*" id="ssInput" style="display:none" onchange="handleScreenshot(this.files[0])">
+            <button onclick="document.getElementById('ssInput').click()" style="width:100%;padding:9px 14px;background:var(--wh);border:1px solid #C2185B30;border-radius:10px;color:#C2185B;font-weight:600;font-size:13px;cursor:pointer;text-align:left;letter-spacing:.2px">スクリーンショットを選ぶ${f.thumbnail?" · 選択済み":""}</button>
+          </div>
+
+          <div style="border:1px solid #6B46C128;border-radius:12px;padding:12px 14px;background:var(--b1)">
+            <div style="font-size:10px;font-weight:700;color:#6B46C1;margin-bottom:6px;letter-spacing:1.5px">③ テキストを貼り付けて解析</div>
+            <div style="font-size:11px;color:var(--bl);margin-bottom:8px">キャプション · 概要欄 · レシピ文章をコピーして貼り付け</div>
+            <textarea class="fi" id="ptxt" placeholder="レシピのテキストをここに貼り付け..." style="font-size:13px;padding:10px 12px;min-height:60px;background:var(--wh)"></textarea>
+            <button onclick="analyzeText()" style="width:100%;padding:8px 14px;background:var(--wh);border:1px solid #6B46C128;border-radius:10px;color:#6B46C1;font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;letter-spacing:.2px">このテキストを解析する</button>
+          </div>
+
+          ${V.aiState!=="idle"?`<div style="margin-top:12px;padding:10px 14px;border-radius:10px;background:${aiBg};font-size:12px;color:${aiColor};letter-spacing:.2px">${V.aiMsg}</div>`:""}
         </div>
-        <div style="margin-bottom:14px"><label class="lbl">📝 メモ・分量・アレンジ</label><textarea class="fi" oninput="uf('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3...">${esc(f.memo)}</textarea></div>
-        <div style="margin-bottom:14px"><label class="lbl">🏷️ タグ（カンマ区切り）</label><input class="fi" placeholder="定番, お弁当OK" value="${esc(f.tags)}" oninput="uf('tags',this.value)"></div>
-        <div style="margin-bottom:16px"><label class="lbl">⭐ 評価</label><div>${stars(f.rating,true)}</div></div>
+
+        ${th?`<img src="${esc(th)}" style="width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px">`:""}
+
+        <div style="margin-bottom:14px"><label class="lbl">料理名</label><input class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
+          <div><label class="lbl">ジャンル</label><select class="fi" onchange="uf('genre',this.value)">${GENRES.filter(g=>g!=="すべて").map(g=>`<option ${f.genre===g?"selected":""}>${g}</option>`).join("")}</select></div>
+          <div><label class="lbl">参照元</label><select class="fi" onchange="uf('source',this.value)">${SOURCES.map(s=>`<option value="${s.id}" ${f.source===s.id?"selected":""}>${s.label}</option>`).join("")}</select></div>
+        </div>
+        <button class="btn" ${(!f.title.trim()||V.aiState==="loading")?"disabled":""} onclick="if('${f.title.trim()}')sv({fStep:2})">${V.aiState==="loading"?"解析中...":"次へ"}</button>
+      `:`
+        <div style="background:var(--wh);border-radius:14px;padding:14px 16px;margin-bottom:18px;border:1px solid var(--b3);display:flex;align-items:center;gap:14px">
+          ${th?`<img src="${esc(th)}" style="width:54px;height:54px;border-radius:10px;object-fit:cover;flex-shrink:0">`:""}
+          <div><div class="serif" style="color:var(--br);font-size:15px;font-weight:600">${esc(f.title)}</div><div style="margin-top:5px">${badge(f.source,true)}</div></div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <label class="lbl" style="margin-bottom:0">使っている食材</label>
+            <button onclick="sv({showCM:true})" style="background:none;border:none;color:var(--bl);font-size:11px;cursor:pointer;text-decoration:underline;letter-spacing:.3px">カテゴリ管理</button>
+          </div>
+          <button onclick="sv({showFI:true})" style="width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:12px;font-size:14px;background:var(--wh);color:var(--bm);cursor:pointer;text-align:left;margin-bottom:10px;letter-spacing:.2px">食材を選ぶ（${f.ingredients.length}品目）</button>
+          ${f.ingredients.length>0?`<div style="display:flex;flex-wrap:wrap;gap:6px">${f.ingredients.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:5px;background:${col}14;border:1px solid ${col}30;border-radius:99px;padding:4px 12px;font-size:12px;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
+        </div>
+
+        <div style="margin-bottom:14px"><label class="lbl">メモ · 分量 · アレンジ</label><textarea class="fi" oninput="uf('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3。調理のポイント...">${esc(f.memo)}</textarea></div>
+        <div style="margin-bottom:14px"><label class="lbl">タグ（カンマ区切り）</label><input class="fi" placeholder="定番, お弁当, 時短" value="${esc(f.tags)}" oninput="uf('tags',this.value)"></div>
+        <div style="margin-bottom:22px"><label class="lbl">評価</label>${stars(f.rating,true)}</div>
+
         <div style="display:flex;gap:10px">
-          <button class="btn sec" style="flex:1" onclick="sv({fStep:1})">← 戻る</button>
-          <button class="btn" style="flex:2" ${V.saving?"disabled":""} onclick="doSave()">${V.saving?"保存中...":isE?"💾 更新する":"🎉 追加する"}</button>
+          <button class="btn sec" style="flex:1" onclick="sv({fStep:1})">戻る</button>
+          <button class="btn" style="flex:2" ${V.saving?"disabled":""} onclick="doSave()">${V.saving?"保存中...":isE?"更新する":"保存する"}</button>
         </div>
       `}
     </div>
-    ${V.showFI?ingModal(f.ingredients,"tFmI","sv({showFI:false})",V.fic,"sv({fic:"):""}
-    ${V.showCM?catMgrModal():""}
+    ${V.showFI?iMod(f.ingredients,"tFmI","sv({showFI:false})",V.fic,"sv({fic:"):""}
+    ${V.showCM?catMod():""}
   </div>`;}
 
 function vFridge(){
-  const ac=V.fc||V.ingMaster[0]?.id;
-  const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];
+  const ac=V.fc||V.ingMaster[0]?.id;const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];
   const res=V.recipes.filter(r=>V.fIng.length===0||V.fIng.every(i=>(r.ingredients||[]).includes(i)));
-  return`<div style="min-height:100vh;display:flex;flex-direction:column">
-    <div style="background:#fff;padding:14px 16px;border-bottom:2px solid #F0DDD0;position:sticky;top:0;z-index:100">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div><div style="font-weight:900;font-size:18px;color:#2D1B0E">🥕 冷蔵庫から探す</div><div style="font-size:12px;color:#C4A98A">食材を選んでレシピを絞り込もう</div></div>
-        <button onclick="sv({showCM:true})" style="background:#FFF5EE;border:2px solid #F0DDD0;border-radius:12px;padding:6px 12px;font-size:12px;color:#9C6E4A;cursor:pointer;font-weight:700">⚙️ カテゴリ管理</button>
-      </div>
-    </div>
-    <div class="scroll-row">${V.ingMaster.map(x=>chip(x.icon+" "+x.name,ac===x.id,"sv({fc:'"+x.id+"'})")).join("")}</div>
-    <div style="padding:12px 16px;background:#fff;border-bottom:2px solid #F0DDD0">
-      <div style="font-size:11px;font-weight:800;color:#9C6E4A;margin-bottom:8px">${cc?.icon} ${esc(cc?.name)}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${(cc?.items||[]).map(i=>{const on=V.fIng.includes(i);return`<button class="chip${on?" on":""}" onclick="tFI('${i}')">${on?"✓ ":""}${esc(i)}</button>`;}).join("")}
-      </div>
-    </div>
-    ${V.fIng.length>0?`<div style="padding:8px 16px;background:#FFF5EE;border-bottom:1px solid #F0DDD0;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span style="font-size:12px;color:#9C6E4A;font-weight:800;white-space:nowrap">選択中:</span>${V.fIng.map(i=>`<span style="background:#fff;border:2px solid ${AC};border-radius:99px;padding:3px 10px;font-size:12px;color:${AC};font-weight:700;cursor:pointer" onclick="tFI('${i}')">${esc(i)} ✕</span>`).join("")}<button onclick="sv({fIng:[]})" style="background:none;border:none;font-size:12px;color:#C4A98A;cursor:pointer;margin-left:auto">全クリア</button></div>`:""}
-    <div style="padding:8px 16px;background:#FFF8F0;border-bottom:1px solid #F0DDD0;font-size:12px;color:#9C6E4A;font-weight:700">${V.fIng.length>0?"🔍 "+res.length+"件ヒット":"📚 全"+V.recipes.length+"件"}</div>
-    <div style="flex:1;padding:12px;padding-bottom:80px">
-      ${res.length===0?`<div style="text-align:center;padding:60px 20px;color:#C4A98A"><div style="font-size:44px;margin-bottom:12px">🥺</div><div style="font-size:16px;font-weight:700">該当レシピなし</div></div>`:`
-      <div class="grid2">${res.map(r=>`<div class="card" onclick="openDetail('${r.id}')">
-        ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:#F5E6D8;display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:#F5E6D8;display:flex;align-items:center;justify-content:center;font-size:36px">🍽️</div>`}
-        <div style="padding:10px 12px 12px">
-          <div style="font-size:13px;font-weight:800;color:#2D1B0E;margin-bottom:5px;line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div>
-          ${(r.ingredients||[]).length>0?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">${r.ingredients.slice(0,3).map(i=>`<span style="background:${V.fIng.includes(i)?AC:"#F5E6D8"};color:${V.fIng.includes(i)?"#fff":"#9C6E4A"};border-radius:99px;padding:1px 7px;font-size:9px;font-weight:700">${esc(i)}</span>`).join("")}</div>`:""}
-          <div>${stars(r.rating,false)}</div>
+  return`<div style="min-height:100vh;display:flex;flex-direction:column;background:var(--b1)">
+    <div style="background:var(--br);padding:16px 16px 0">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
+        <div>
+          <div class="serif" style="font-size:18px;color:var(--wh);letter-spacing:.3px">冷蔵庫から探す</div>
+          <div style="font-size:11px;color:var(--b4);margin-top:2px;letter-spacing:.3px">手持ちの食材でレシピを検索</div>
         </div>
-      </div>`).join("")}</div>`}
+        <button onclick="sv({showCM:true})" style="background:rgba(255,252,248,.12);border:1px solid rgba(255,252,248,.2);border-radius:10px;padding:7px 12px;font-size:12px;color:var(--b3);cursor:pointer;letter-spacing:.3px">カテゴリ管理</button>
+      </div>
+      <div style="height:2px;background:linear-gradient(90deg,var(--am),var(--al),transparent)"></div>
+    </div>
+
+    <!-- 食材カテゴリタブ（カラードット付き） -->
+    <div class="srow">
+      ${V.ingMaster.map(x=>`<button onclick="sv({fc:'${x.id}'})" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap">
+        <span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}
+      </button>`).join("")}
+    </div>
+
+    <!-- 食材ボタン -->
+    <div style="padding:14px 16px;background:var(--wh);border-bottom:1px solid var(--b3)">
+      <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:10px;letter-spacing:1.5px">${esc(cc?.name)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">
+        ${(cc?.items||[]).map(i=>{const on=V.fIng.includes(i);return`<button onclick="tFI('${i}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+"66":"var(--b3)"};background:${on?cc.color+"18":"var(--wh)"};color:${on?cc.color:"var(--bm)"};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?"600":"400"};cursor:pointer">
+          <span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?"✓ ":""}${esc(i)}
+        </button>`;}).join("")}
+      </div>
+    </div>
+
+    <!-- 選択中食材 -->
+    ${V.fIng.length>0?`<div style="padding:10px 16px;background:var(--ap);border-bottom:1px solid var(--am)30;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:10px;color:var(--ad);font-weight:700;white-space:nowrap;letter-spacing:.8px">選択中の食材</span>
+      ${V.fIng.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span onclick="tFI('${i}')" style="display:inline-flex;align-items:center;gap:4px;background:var(--wh);border:1px solid ${col}44;border-radius:99px;padding:3px 10px;font-size:11px;color:${col};cursor:pointer"><span style="width:5px;height:5px;border-radius:50%;background:${col};display:inline-block"></span>${esc(i)} ×</span>`;}).join("")}
+      <button onclick="sv({fIng:[]})" style="background:none;border:none;font-size:11px;color:var(--bl);cursor:pointer;margin-left:auto;letter-spacing:.3px">すべてクリア</button>
+    </div>`:""}
+
+    <div style="padding:7px 16px;background:var(--b2);border-bottom:1px solid var(--b3);font-size:11px;color:var(--bl);letter-spacing:.3px">${V.fIng.length>0?res.length+"件ヒット":"全"+V.recipes.length+"件"}</div>
+
+    <div style="flex:1;padding:14px;padding-bottom:84px">
+      ${res.length===0?`<div style="text-align:center;padding:64px 20px;color:var(--bl)">
+        <div class="serif" style="font-size:16px;color:var(--b4);font-style:italic">該当するレシピがありません</div>
+        <div style="font-size:13px;margin-top:8px">食材の組み合わせを変えてみてください</div>
+      </div>`:`
+      <div class="g2">${res.map(r=>{
+        const mainIng=r.ingredients?.[0];const cat2=V.ingMaster.find(c=>c.items.includes(mainIng));const acCol=cat2?.color||"var(--b3)";
+        return`<div class="card" onclick="openDetail('${r.id}')">
+          <div style="position:relative">
+            ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--b2);display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+              <div style="display:flex;gap:4px">${(r.ingredients||[]).slice(0,3).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:10px;height:10px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div>
+              <span class="serif" style="font-size:11px;color:var(--b4);font-style:italic">${esc(r.genre)}</span>
+            </div>`}
+            <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${acCol};opacity:.8"></div>
+          </div>
+          <div style="padding:10px 12px 12px">
+            <div style="font-size:13px;font-weight:600;color:var(--br);margin-bottom:5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div>
+            ${(r.ingredients||[]).length>0?`<div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:5px">${r.ingredients.slice(0,3).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:3px;background:${V.fIng.includes(i)?col+"22":"transparent"};border:1px solid ${col}${V.fIng.includes(i)?"44":"22"};border-radius:99px;padding:1px 7px;font-size:9px;color:${col}"><span style="width:4px;height:4px;border-radius:50%;background:${col};display:inline-block"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
+            ${stars(r.rating,false)}
+          </div>
+        </div>`;}).join("")}</div>`}
     </div>
     ${navBar("fridge")}
-    ${V.showCM?catMgrModal():""}
+    ${V.showCM?catMod():""}
   </div>`;}
 
-// ─── Render ────────────────────────────────────────────────────────────────────
 function render(){
   const el=document.getElementById("app");if(!el)return;
   if(V.view==="login")el.innerHTML=vLogin();
@@ -462,10 +687,6 @@ function render(){
   else if(V.view==="add"||V.view==="edit")el.innerHTML=vAdd();
   else if(V.view==="fridge")el.innerHTML=vFridge();
 }
-
-// nextStep fix
-window.goNext=()=>{if(V.form.title.trim()&&V.aiState!=="loading")sv({fStep:2});};
-
 render();
 </script>
 </body>
