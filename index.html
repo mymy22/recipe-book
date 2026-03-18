@@ -7,39 +7,39 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="My Recipe Book">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#3D2E1E">
+<meta name="theme-color" content="#1C1B19">
 <title>My Recipe Book</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --b1:#FAF6EE;--b2:#F2EAD8;--b3:#E0D0B4;--b4:#C8B490;--b5:#A89070;
-  --br:#3D2E1E;--bm:#6B5040;--bl:#9C8068;
-  --am:#C8980A;--al:#E0AE20;--ad:#9A7208;--ap:#FBF4DC;
-  --rd:#9A3A2A;--rdp:#F8EAE6;--wh:#FEFCF7;
+  --b1:#F7F6F3;--b2:#EEECEA;--b3:#DEDAD4;--b4:#B0ADA6;--b5:#888480;
+  --br:#1C1B19;--bm:#3E3C3A;--bl:#888480;
+  --am:#1C1B19;--al:#3E3C3A;--ad:#000000;--ap:#EEECEA;
+  --rd:#7A3020;--rdp:#F4ECEA;--wh:#FFFFFF;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
 html,body{background:var(--b1);overscroll-behavior:none}
-body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;color:var(--br);font-weight:400}
-.serif{font-family:'Playfair Display',Georgia,serif}
+body{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;color:var(--br);font-weight:300}
+.serif{font-family:'Noto Sans JP','Hiragino Sans',sans-serif;font-weight:300}
 input,select,textarea,button{font-family:'Noto Sans JP',sans-serif;color:var(--br)}
 ::-webkit-scrollbar{display:none}
 .app{max-width:430px;margin:0 auto;min-height:100vh;background:var(--b1)}
-.srow{display:flex;gap:8px;overflow-x:auto;padding:10px 16px;background:var(--wh);border-bottom:1px solid var(--b3);scrollbar-width:none}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:14px}
-.mbg{position:fixed;inset:0;background:rgba(30,18,8,.65);z-index:500;display:flex;align-items:flex-end}
-.mbox{background:var(--b1);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;max-height:84vh;display:flex;flex-direction:column;border-top:2px solid var(--am)}
+.srow{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;background:var(--wh);border-bottom:1px solid var(--b3);scrollbar-width:none}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:flex;align-items:flex-end}
+.mbox{background:var(--wh);border-radius:0;width:100%;max-width:430px;margin:0 auto;max-height:84vh;display:flex;flex-direction:column;border-top:2px solid var(--br)}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--wh);border-top:1px solid var(--b3);display:flex;z-index:200}
-.fab{position:fixed;bottom:72px;right:max(16px,calc(50% - 200px));background:var(--am);color:var(--wh);border:none;border-radius:50%;width:54px;height:54px;font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(200,152,10,.4);display:flex;align-items:center;justify-content:center;z-index:150}
-.chip{border:1px solid var(--b3);background:var(--wh);color:var(--bm);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
-.on{border-color:var(--am)!important;background:var(--am)!important;color:var(--wh)!important}
-.card{background:var(--wh);border-radius:16px;overflow:hidden;box-shadow:0 2px 14px rgba(61,46,30,.07);cursor:pointer;border:1px solid var(--b3)}
-.fi{width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:12px;font-size:16px;background:var(--wh);color:var(--br);outline:none;display:block}
-.fi:focus{border-color:var(--am)}
+.fab{position:fixed;bottom:72px;right:max(16px,calc(50% - 200px));background:var(--br);color:var(--wh);border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;z-index:150}
+.chip{border:1px solid var(--b3);background:var(--wh);color:var(--bm);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:300;cursor:pointer;white-space:nowrap}
+.on{border-color:var(--br)!important;background:var(--br)!important;color:var(--wh)!important}
+.card{background:var(--wh);border-radius:0;overflow:hidden;box-shadow:none;cursor:pointer;border:1px solid var(--b3)}
+.fi{width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:0;font-size:16px;background:var(--wh);color:var(--br);outline:none;display:block}
+.fi:focus{border-color:var(--br)}
 textarea.fi{resize:vertical;min-height:80px}
-.lbl{font-size:10px;font-weight:700;color:var(--b5);margin-bottom:6px;display:block;letter-spacing:1.5px;text-transform:uppercase}
-.btn{background:var(--am);color:var(--wh);border:none;border-radius:12px;padding:13px 16px;font-size:15px;font-weight:600;cursor:pointer;width:100%;display:block;text-align:center;letter-spacing:.3px}
-.btn.sec{background:var(--b2);color:var(--bm);border:1px solid var(--b3)}
-.btn.danger{background:var(--rdp);color:var(--rd);border:1px solid #DDB8B0}
+.lbl{font-size:10px;font-weight:400;color:var(--b5);margin-bottom:6px;display:block;letter-spacing:1.5px;text-transform:uppercase}
+.btn{background:var(--br);color:var(--wh);border:none;border-radius:0;padding:14px 16px;font-size:14px;font-weight:400;cursor:pointer;width:100%;display:block;text-align:center;letter-spacing:.8px}
+.btn.sec{background:var(--wh);color:var(--bm);border:1px solid var(--b3)}
+.btn.danger{background:var(--rdp);color:var(--rd);border:1px solid #D4A8A0}
 .btn:disabled{background:var(--b3);color:var(--bl);cursor:not-allowed}
 /* パスワード表示トグル */
 .pw-wrap{position:relative;margin-bottom:12px}
@@ -131,21 +131,14 @@ function renderAuth(){
   const app=document.getElementById("app");
   if(!app)return;
 
-  let html=`<div style="min-height:100vh;background:linear-gradient(170deg,var(--b1) 0%,var(--b2) 60%,var(--b3) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px">
-    <div style="margin-bottom:24px;text-align:center">
-      <div style="display:inline-flex;align-items:center;gap:8px">
-        <span style="display:inline-block;width:28px;height:2px;background:var(--am)"></span>
-        <span class="serif" style="font-size:11px;color:var(--am);letter-spacing:4px;font-style:italic">Kitchen Garden</span>
-        <span style="display:inline-block;width:28px;height:2px;background:var(--am)"></span>
-      </div>
+  let html=`<div style="min-height:100vh;background:var(--b1);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px">
+    <div style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:40px">
+      <div style="font-size:13px;color:var(--br);letter-spacing:4px;font-weight:400">MY RECIPE BOOK</div>
+      <div style="width:20px;height:1px;background:var(--b4);margin:14px auto 12px"></div>
+      <div style="font-size:11px;color:var(--bl);letter-spacing:.5px">${authMode==="login"?"おかえりなさい":authMode==="register"?"アカウントを作成":"パスワードを再設定"}</div>
     </div>
-    <div style="background:var(--wh);border-radius:20px;padding:40px 30px;width:100%;max-width:380px;box-shadow:0 10px 40px rgba(61,46,30,.10);border:1px solid var(--b3)">
-      <div class="serif" style="font-size:26px;color:var(--br);text-align:center;margin-bottom:8px">My Recipe Book</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:24px">
-        <span style="display:inline-block;width:20px;height:1px;background:var(--b3)"></span>
-        <span style="font-size:11px;color:var(--bl);letter-spacing:.5px">${authMode==="login"?"おかえりなさい":authMode==="register"?"アカウントを作成":"パスワードを再設定"}</span>
-        <span style="display:inline-block;width:20px;height:1px;background:var(--b3)"></span>
-      </div>`;
+    <div style="background:var(--wh);padding:32px 28px;border:1px solid var(--b3)">`;
 
   if(authMode==="reset"){
     html+=`
@@ -174,7 +167,8 @@ function renderAuth(){
   }
 
   html+=`
-      <div style="margin-top:18px;font-size:11px;color:var(--b4);text-align:center;letter-spacing:.3px">${FB_ON?"データはクラウドに保存されます（全デバイス共通）":"データはこのブラウザに保存されます"}</div>
+      <div style="margin-top:20px;font-size:11px;color:var(--b4);text-align:center;letter-spacing:.3px">${FB_ON?"データはクラウドに保存されます（全デバイス共通）":"データはこのブラウザに保存されます"}</div>
+    </div>
     </div>
   </div>`;
   app.innerHTML=html;
@@ -269,9 +263,9 @@ function dSrc(u){if(!u)return"memo";if(u.includes("instagram"))return"instagram"
 function ytT(u){const m=u.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?"https://img.youtube.com/vi/"+m[1]+"/hqdefault.jpg":null;}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
 function stars(v,ed){return`<div style="display:flex;gap:3px;align-items:center">${[1,2,3,4,5].map(n=>`<span style="font-size:14px;cursor:${ed?"pointer":"default"};color:${n<=v?"var(--am)":"var(--b3)"};line-height:1" ${ed?`onclick="setStar(${n})"`:""}">★</span>`).join("")}</div>`;}
-function badge(sid,sm){const s=SM[sid]||SM.memo;return`<span style="display:inline-flex;align-items:center;gap:5px;background:${s.color}14;color:${s.color};border:1px solid ${s.color}28;border-radius:4px;padding:${sm?"2px 8px":"3px 10px"};font-size:${sm?10:11}px;font-weight:500;white-space:nowrap"><span style="width:5px;height:5px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>${s.label}</span>`;}
+function badge(sid,sm){const s=SM[sid]||SM.memo;return`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--b2);color:var(--bl);border:1px solid var(--b3);border-radius:0;padding:${sm?"2px 8px":"3px 10px"};font-size:${sm?10:11}px;font-weight:300;white-space:nowrap;letter-spacing:.3px">${s.label}</span>`;}
 function chip(l,on,oc){return`<button class="chip${on?" on":""}" onclick="${oc}">${l}</button>`;}
-function navBar(act){return`<div class="bnav">${[["home","一覧","≡"],["add","追加","＋"],["fridge","冷蔵庫","▦"]].map(([v,lb,ic])=>`<button onclick="${v==="add"?"goAdd()":"sv({view:'"+v+"'})"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 10px;gap:2px;background:none;border:none;cursor:pointer;color:${act===v?"var(--am)":"var(--b4)"}"><span style="font-size:18px;font-family:'Playfair Display',serif;line-height:1">${ic}</span><span style="font-size:10px;letter-spacing:.5px">${lb}</span></button>`).join("")}</div>`;}
+function navBar(act){return`<div class="bnav">${[["home","一覧","≡"],["add","追加","＋"],["fridge","冷蔵庫","▦"]].map(([v,lb,ic])=>`<button onclick="${v==="add"?"goAdd()":"sv({view:'"+v+"'})"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 10px;gap:2px;background:none;border:none;cursor:pointer;color:${act===v?"var(--br)":"var(--b4)"}"><span style="font-size:18px;line-height:1;font-weight:300">${ic}</span><span style="font-size:10px;letter-spacing:.5px;font-weight:300">${lb}</span></button>`).join("")}</div>`;}
 
 window.setStar=n=>sv({form:{...V.form,rating:n}});
 window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},fStep:1,aiState:"idle",aiMsg:""});
@@ -423,19 +417,18 @@ function filtered(){
 function vHome(){
   const fl=filtered();
   return`<div style="display:flex;flex-direction:column;min-height:100vh">
-    <div style="background:var(--br);padding:16px 16px 0;position:sticky;top:0;z-index:100">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px">
-        <div><div class="serif" style="font-size:20px;color:var(--wh);letter-spacing:.5px">My Recipe Book</div><div style="font-size:11px;color:var(--b4);margin-top:1px;letter-spacing:.3px">${esc(U?.name||"")}さんのレシピ帳</div></div>
+    <div style="background:var(--br);padding:14px 16px;position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(255,255,255,.08)">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div><div style="font-size:14px;color:var(--wh);letter-spacing:3px;font-weight:400">MY RECIPE BOOK</div><div style="font-size:10px;color:var(--b4);margin-top:3px;letter-spacing:.5px;font-weight:300">${esc(U?.name||"")}のレシピ帳</div></div>
         <div style="display:flex;gap:8px;align-items:center">
-          <select onchange="sv({sort:this.value})" style="border:1px solid rgba(255,252,248,.2);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--b2);background:rgba(255,252,248,.1)">
+          <select onchange="sv({sort:this.value})" style="border:1px solid rgba(255,255,255,.15);border-radius:0;padding:5px 8px;font-size:11px;color:var(--b3);background:rgba(255,255,255,.08);letter-spacing:.3px">
             <option value="newest" ${V.sort==="newest"?"selected":""}>新着順</option>
             <option value="rating" ${V.sort==="rating"?"selected":""}>評価順</option>
             <option value="cooked" ${V.sort==="cooked"?"selected":""}>よく作る順</option>
           </select>
-          <button onclick="doLogout()" style="background:rgba(255,252,248,.1);border:1px solid rgba(255,252,248,.2);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--b3);cursor:pointer">ログアウト</button>
+          <button onclick="doLogout()" style="background:none;border:1px solid rgba(255,255,255,.2);border-radius:0;padding:5px 10px;font-size:11px;color:var(--b3);cursor:pointer;letter-spacing:.3px">ログアウト</button>
         </div>
       </div>
-      <div style="height:2px;background:linear-gradient(90deg,var(--am),var(--al),transparent)"></div>
     </div>
     <div style="background:var(--wh);padding:10px 16px;border-bottom:1px solid var(--b3);display:flex;gap:8px">
       <div style="position:relative;flex:1">
@@ -476,11 +469,10 @@ function vDetail(){
     <div style="position:relative">
       ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`:`<div style="width:100%;aspect-ratio:16/9;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px"><div style="display:flex;gap:6px">${(r.ingredients||[]).slice(0,4).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:14px;height:14px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div><span class="serif" style="font-size:18px;color:var(--b4);font-style:italic">${esc(r.genre)}</span></div>`}
       <button onclick="sv({view:'home'})" style="position:absolute;top:14px;left:14px;background:rgba(30,18,8,.55);border:none;border-radius:99px;color:var(--wh);width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">←</button>
-      <div style="height:2px;background:linear-gradient(90deg,${accentColor},var(--am),transparent)"></div>
     </div>
     <div style="padding:20px 18px 40px">
       <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px">
-        <div style="flex:1"><h1 class="serif" style="font-size:22px;color:var(--br);margin:0;line-height:1.25;font-weight:600">${esc(r.title)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badge(r.source,false)}<span style="background:var(--b2);color:var(--bm);border:1px solid var(--b3);border-radius:4px;padding:3px 10px;font-size:11px">${esc(r.genre)}</span></div></div>
+        <div style="flex:1"><h1 style="font-size:20px;color:var(--br);margin:0;line-height:1.35;font-weight:400;letter-spacing:.3px">${esc(r.title)}</h1><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${badge(r.source,false)}<span style="background:var(--b2);color:var(--bm);border:1px solid var(--b3);border-radius:4px;padding:3px 10px;font-size:11px">${esc(r.genre)}</span></div></div>
         <div style="text-align:right;flex-shrink:0">${stars(r.rating,false)}<div style="font-size:11px;color:var(--bl);margin-top:4px;letter-spacing:.3px">${r.cookedCount||0}回 調理済</div></div>
       </div>
       ${(r.ingredients||[]).length>0?`<div style="background:var(--wh);border-radius:14px;padding:14px 16px;margin-bottom:14px;border:1px solid var(--b3)"><div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:10px;letter-spacing:1.5px">使っている食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${r.ingredients.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:5px;background:${col}12;border:1px solid ${col}30;border-radius:99px;padding:5px 12px;font-size:12px;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)}</span>`;}).join("")}</div></div>`:""}
@@ -556,7 +548,6 @@ function vFridge(){
         <div><div class="serif" style="font-size:18px;color:var(--wh);letter-spacing:.3px">冷蔵庫から探す</div><div style="font-size:11px;color:var(--b4);margin-top:2px;letter-spacing:.3px">手持ちの食材でレシピを検索</div></div>
         <button onclick="sv({showCM:true})" style="background:rgba(255,252,248,.12);border:1px solid rgba(255,252,248,.2);border-radius:10px;padding:7px 12px;font-size:12px;color:var(--b3);cursor:pointer;letter-spacing:.3px">カテゴリ管理</button>
       </div>
-      <div style="height:2px;background:linear-gradient(90deg,var(--am),var(--al),transparent)"></div>
     </div>
     <div class="srow">${V.ingMaster.map(x=>`<button onclick="sv({fc:'${x.id}'})" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}</button>`).join("")}</div>
     <div style="padding:14px 16px;background:var(--wh);border-bottom:1px solid var(--b3)">
