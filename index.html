@@ -273,7 +273,13 @@ window.uf=(k,v)=>{V.form={...V.form,[k]:v};};
 window.startCompose=()=>{};
 window.endCompose=(k,v)=>{V.form={...V.form,[k]:v};};
 
-window.updateUrlField=(url)=>{const src=dSrc(url);const th=V.form.thumbnail||(src==="youtube"&&url?ytT(url)||"":"");V.form={...V.form,url,source:src,thumbnail:th};render();};
+let _searchTimer=null;
+window.doSearch=(v)=>{V.q=v;clearTimeout(_searchTimer);_searchTimer=setTimeout(render,300);};
+
+window.updateCatName=(v)=>{V.cnn=v;};
+
+let _urlTimer=null;
+window.updateUrlField=(url)=>{V.form={...V.form,url};clearTimeout(_urlTimer);_urlTimer=setTimeout(()=>{const src=dSrc(url);const th=V.form.thumbnail||(src==="youtube"&&url?ytT(url)||"":"");V.form={...V.form,url,source:src,thumbnail:th};render();},400);};
 
 window.handleUrl=async(url)=>{
   V.form={...V.form,url,source:dSrc(url)};
@@ -348,7 +354,7 @@ window.addItem=catId=>{const el=document.getElementById("nii_"+catId);if(!el||!e
 window.delItem=(catId,item)=>{V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;render();};
 window.toggleCE=id=>sv({cme:V.cme?.id===id?null:V.ingMaster.find(c=>c.id===id)});
 window.delCat=id=>{if(!confirm("削除しますか？"))return;V.ingMaster=V.ingMaster.filter(c=>c.id!==id);DB.ingMaster=V.ingMaster;dbs(DB);sv({ingMaster:V.ingMaster,cme:null});};
-window.addCat=()=>{if(!V.cnn.trim())return;const nc={id:"c_"+Date.now(),color:V.cncol,name:V.cnn.trim(),items:[]};V.ingMaster=[...V.ingMaster,nc];DB.ingMaster=V.ingMaster;dbs(DB);sv({ingMaster:V.ingMaster,cnn:"",cmt:"list",cme:nc});};
+window.addCat=()=>{const nameEl=document.getElementById('fi_catname');const name=(nameEl?.value||V.cnn).trim();if(!name)return;const nc={id:"c_"+Date.now(),color:V.cncol,name,items:[]};V.ingMaster=[...V.ingMaster,nc];DB.ingMaster=V.ingMaster;dbs(DB);sv({ingMaster:V.ingMaster,cnn:"",cmt:"list",cme:nc});};
 
 function iMod(sel,onT,onC,ac0,sAC){
   const ac=ac0||V.ingMaster[0]?.id;const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];
@@ -398,7 +404,7 @@ function catMod(){
         <label class="lbl">カテゴリカラー</label>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">${COLORS.map(col=>`<button onclick="sv({cncol:'${col}'})" style="width:32px;height:32px;border-radius:50%;background:${col};border:${V.cncol===col?"3px solid var(--br)":"2px solid transparent"};cursor:pointer"></button>`).join("")}</div>
         <label class="lbl">カテゴリ名</label>
-        <input id="fi_catname" class="fi" placeholder="例：スパイス、調味料..." value="${esc(V.cnn)}" oninput="sv({cnn:this.value})" style="margin-bottom:14px">
+        <input id="fi_catname" class="fi" placeholder="例：スパイス、調味料..." value="${esc(V.cnn)}" oninput="updateCatName(this.value)" style="margin-bottom:14px">
         <div style="background:var(--wh);border-radius:12px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--b3);display:flex;align-items:center;gap:10px">
           <span style="width:12px;height:12px;border-radius:50%;background:${V.cncol};display:inline-block;flex-shrink:0"></span>
           <span style="font-weight:500;color:var(--br);font-size:15px">${esc(V.cnn)||"カテゴリ名"}</span>
@@ -437,7 +443,7 @@ function vHome(){
     <div style="background:var(--wh);padding:10px 16px;border-bottom:1px solid var(--b3);display:flex;gap:8px">
       <div style="position:relative;flex:1">
         <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--b4)">◎</span>
-        <input id="fi_search" placeholder="レシピ名・食材・タグで検索" value="${esc(V.q)}" oninput="sv({q:this.value})" style="width:100%;padding:10px 14px 10px 34px;border:1px solid var(--b3);border-radius:99px;font-size:15px;background:var(--b1);outline:none;box-sizing:border-box;color:var(--br)">
+        <input id="fi_search" placeholder="レシピ名・食材・タグで検索" value="${esc(V.q)}" oninput="doSearch(this.value)" style="width:100%;padding:10px 14px 10px 34px;border:1px solid var(--b3);border-radius:99px;font-size:15px;background:var(--b1);outline:none;box-sizing:border-box;color:var(--br)">
       </div>
       <button onclick="sv({showIM:true})" style="background:${V.fIng.length>0?"var(--am)":"var(--b2)"};color:${V.fIng.length>0?"var(--wh)":"var(--bm)"};border:1px solid ${V.fIng.length>0?"var(--am)":"var(--b3)"};border-radius:99px;padding:0 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;letter-spacing:.3px">食材${V.fIng.length>0?" · "+V.fIng.length:""}</button>
     </div>
