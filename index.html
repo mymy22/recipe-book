@@ -279,7 +279,26 @@ window.doSearch=(v)=>{V.q=v;clearTimeout(_searchTimer);_searchTimer=setTimeout(r
 window.updateCatName=(v)=>{V.cnn=v;};
 
 let _urlTimer=null;
-window.updateUrlField=(url)=>{V.form={...V.form,url};clearTimeout(_urlTimer);_urlTimer=setTimeout(()=>{const src=dSrc(url);const th=V.form.thumbnail||(src==="youtube"&&url?ytT(url)||"":"");V.form={...V.form,url,source:src,thumbnail:th};render();},400);};
+window.updateUrlField=(url)=>{
+  V.form={...V.form,url};
+  clearTimeout(_urlTimer);
+  _urlTimer=setTimeout(async()=>{
+    const src=dSrc(url);
+    V.form={...V.form,url,source:src};
+    if(src==="youtube"&&url){
+      V.form={...V.form,thumbnail:V.form.thumbnail||ytT(url)||""};render();
+    }else if(url&&url.startsWith("http")){
+      render();
+      if(!V.form.thumbnail){
+        try{
+          const res=await fetch("https://api.microlink.io/?url="+encodeURIComponent(url));
+          const d=await res.json();
+          if(d.status==="success"&&d.data?.image?.url&&!V.form.thumbnail){V.form={...V.form,thumbnail:d.data.image.url};render();}
+        }catch{}
+      }
+    }else render();
+  },700);
+};
 
 window.handleUrl=async(url)=>{
   V.form={...V.form,url,source:dSrc(url)};
@@ -348,8 +367,18 @@ window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:
 window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
 window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
 window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[]},fStep:1,aiState:"idle",aiMsg:""});};
-window.tFI=i=>sv({fIng:V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i]});
-window.tFmI=i=>{V.form={...V.form,ingredients:V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i]};render();};
+window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];_rIM(V.fIng,'tFI');};
+window.tFmI=i=>{const ings=V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i];V.form={...V.form,ingredients:ings};_rIM(ings,'tFmI');};
+function _rIM(ings,onT){
+  const ac=V[onT==='tFmI'?'fic':'imc']||V.ingMaster[0]?.id;
+  const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];if(!cc)return;
+  const q=s=>s.replace(/'/g,"\\'");
+  const cnt=document.getElementById('_ic');if(cnt)cnt.textContent=ings.length+'品目 選択中';
+  const lst=document.getElementById('_il');
+  if(lst)lst.innerHTML=(cc.items||[]).map(i=>{const on=ings.includes(i);return`<button onclick="${onT}('${q(i)}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+'66':'var(--b3)'};background:${on?cc.color+'18':'var(--wh)'};color:${on?cc.color:'var(--bm)'};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?'600':'400'};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?'✓ ':''}${esc(i)}</button>`;}).join('');
+  const sel=document.getElementById('_is');
+  if(sel){if(ings.length>0){sel.style.display='';sel.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1px">選択中の食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${ings.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||'var(--b4)';return`<span onclick="${onT}('${q(i)}')" style="display:inline-flex;align-items:center;gap:5px;background:${col}18;border:1px solid ${col}44;border-radius:99px;padding:4px 12px;font-size:12px;color:${col};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)} ×</span>`;}).join('')}</div>`;}else sel.style.display='none';}
+}
 window.addItem=catId=>{const el=document.getElementById("nii_"+catId);if(!el||!el.value.trim())return;const item=el.value.trim();el.value="";V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:[...c.items,item]}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:[...V.cme.items,item]}:V.cme;render();};
 window.delItem=(catId,item)=>{V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;render();};
 window.toggleCE=id=>sv({cme:V.cme?.id===id?null:V.ingMaster.find(c=>c.id===id)});
@@ -360,18 +389,18 @@ function iMod(sel,onT,onC,ac0,sAC){
   const ac=ac0||V.ingMaster[0]?.id;const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];
   return`<div class="mbg" onclick="if(event.target===this)${onC}"><div class="mbox" onclick="event.stopPropagation()">
     <div style="padding:18px 20px 14px;border-bottom:1px solid var(--b3);display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
-      <div><div class="serif" style="font-size:17px;color:var(--br)">食材を選ぶ</div><div style="font-size:12px;color:var(--bl);margin-top:2px">${sel.length}品目 選択中</div></div>
+      <div><div class="serif" style="font-size:17px;color:var(--br)">食材を選ぶ</div><div id="_ic" style="font-size:12px;color:var(--bl);margin-top:2px">${sel.length}品目 選択中</div></div>
       <button class="btn" style="width:auto;padding:8px 20px;font-size:14px" onclick="${onC}">完了</button>
     </div>
     <div class="srow" style="flex-shrink:0">
       ${V.ingMaster.map(x=>`<button onclick="${sAC}('${x.id}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}</button>`).join("")}
     </div>
     <div style="overflow-y:auto;padding:14px 16px 20px;flex:1">
-      <div style="display:flex;flex-wrap:wrap;gap:8px">
-        ${(cc?.items||[]).map(i=>{const on=sel.includes(i);return`<button onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+"66":"var(--b3)"};background:${on?cc.color+"18":"var(--wh)"};color:${on?cc.color:"var(--bm)"};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?"600":"400"};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?"✓ ":""}${i}</button>`;}).join("")}
+      <div id="_il" style="display:flex;flex-wrap:wrap;gap:8px">
+        ${(cc?.items||[]).map(i=>{const on=sel.includes(i);return`<button onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+"66":"var(--b3)"};background:${on?cc.color+"18":"var(--wh)"};color:${on?cc.color:"var(--bm)"};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?"600":"400"};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?"✓ ":""}${esc(i)}</button>`;}).join("")}
       </div>
     </div>
-    ${sel.length>0?`<div style="padding:12px 16px 16px;border-top:1px solid var(--b3);flex-shrink:0"><div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1px">選択中の食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${sel.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||"var(--b4)";return`<span onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;background:${col}18;border:1px solid ${col}44;border-radius:99px;padding:4px 12px;font-size:12px;color:${col};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)} ×</span>`;}).join("")}</div></div>`:""}
+    <div id="_is" style="padding:12px 16px 16px;border-top:1px solid var(--b3);flex-shrink:0${sel.length===0?";display:none":""}"><div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1px">選択中の食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${sel.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||"var(--b4)";return`<span onclick="${onT}('${i}')" style="display:inline-flex;align-items:center;gap:5px;background:${col}18;border:1px solid ${col}44;border-radius:99px;padding:4px 12px;font-size:12px;color:${col};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)} ×</span>`;}).join("")}</div></div>
   </div></div>`;
 }
 
