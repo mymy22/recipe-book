@@ -274,7 +274,7 @@ window.startCompose=()=>{};
 window.endCompose=(k,v)=>{V.form={...V.form,[k]:v};};
 
 let _searchTimer=null;
-window.doSearch=(v)=>{V.q=v;clearTimeout(_searchTimer);_searchTimer=setTimeout(render,300);};
+window.doSearch=(v)=>{V.q=v;clearTimeout(_searchTimer);_searchTimer=setTimeout(()=>{const rl=document.getElementById('_rl');const rc=document.getElementById('_rc');if(rl){const fl=filtered();if(rc)rc.textContent=V.recipes.length+'件のレシピ　·　表示中 '+fl.length+'件';rl.innerHTML=recListHtml(fl);}else render();},200);};
 
 window.updateCatName=(v)=>{V.cnn=v;};
 
@@ -367,18 +367,8 @@ window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:
 window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
 window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
 window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[]},fStep:1,aiState:"idle",aiMsg:""});};
-window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];_rIM(V.fIng,'tFI');};
-window.tFmI=i=>{const ings=V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i];V.form={...V.form,ingredients:ings};_rIM(ings,'tFmI');};
-function _rIM(ings,onT){
-  const ac=V[onT==='tFmI'?'fic':'imc']||V.ingMaster[0]?.id;
-  const cc=V.ingMaster.find(x=>x.id===ac)||V.ingMaster[0];if(!cc)return;
-  const q=s=>s.replace(/'/g,"\\'");
-  const cnt=document.getElementById('_ic');if(cnt)cnt.textContent=ings.length+'品目 選択中';
-  const lst=document.getElementById('_il');
-  if(lst)lst.innerHTML=(cc.items||[]).map(i=>{const on=ings.includes(i);return`<button onclick="${onT}('${q(i)}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${on?cc.color+'66':'var(--b3)'};background:${on?cc.color+'18':'var(--wh)'};color:${on?cc.color:'var(--bm)'};border-radius:99px;padding:7px 14px;font-size:13px;font-weight:${on?'600':'400'};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${cc.color};flex-shrink:0;display:inline-block"></span>${on?'✓ ':''}${esc(i)}</button>`;}).join('');
-  const sel=document.getElementById('_is');
-  if(sel){if(ings.length>0){sel.style.display='';sel.innerHTML=`<div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1px">選択中の食材</div><div style="display:flex;flex-wrap:wrap;gap:6px">${ings.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||'var(--b4)';return`<span onclick="${onT}('${q(i)}')" style="display:inline-flex;align-items:center;gap:5px;background:${col}18;border:1px solid ${col}44;border-radius:99px;padding:4px 12px;font-size:12px;color:${col};cursor:pointer"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)} ×</span>`;}).join('')}</div>`;}else sel.style.display='none';}
-}
+window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];setTimeout(()=>{const mb=document.querySelector('.mbox');if(mb){const t=document.createElement('div');t.innerHTML=iMod(V.fIng,'tFI','sv({showIM:false})',V.imc,'sv({imc:');const nb=t.querySelector('.mbox');if(nb)mb.innerHTML=nb.innerHTML;}},0);};
+window.tFmI=i=>{const ings=V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i];V.form={...V.form,ingredients:ings};setTimeout(()=>{const mb=document.querySelector('.mbox');if(mb){const t=document.createElement('div');t.innerHTML=iMod(ings,'tFmI','sv({showFI:false})',V.fic,'sv({fic:');const nb=t.querySelector('.mbox');if(nb)mb.innerHTML=nb.innerHTML;}},0);};
 window.addItem=catId=>{const el=document.getElementById("nii_"+catId);if(!el||!el.value.trim())return;const item=el.value.trim();el.value="";V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:[...c.items,item]}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:[...V.cme.items,item]}:V.cme;render();};
 window.delItem=(catId,item)=>{V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;render();};
 window.toggleCE=id=>sv({cme:V.cme?.id===id?null:V.ingMaster.find(c=>c.id===id)});
@@ -444,6 +434,8 @@ function catMod(){
   </div></div>`;
 }
 
+function recListHtml(fl){return fl.length===0?`<div style="text-align:center;padding:64px 20px;color:var(--bl)"><div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px"><span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span><span class="serif" style="font-size:15px;color:var(--b4);font-style:italic">No Recipes Yet</span><span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span></div><div style="font-size:13px;color:var(--bl)">右下のボタンからレシピを追加してください</div></div>`:`<div class="g2">${fl.map(r=>{const mainIng=r.ingredients?.[0];const cat=V.ingMaster.find(c=>c.items.includes(mainIng));const accentColor=cat?.color||"var(--b3)";return`<div class="card" onclick="openDetail('${r.id}')"><div style="position:relative">${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--b2);display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="display:flex;gap:4px">${(r.ingredients||[]).slice(0,3).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:10px;height:10px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div><span class="serif" style="font-size:11px;color:var(--b4);font-style:italic">${esc(r.genre)}</span></div>`}<div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${accentColor};opacity:.8"></div></div><div style="padding:10px 12px 12px"><div style="font-size:13px;font-weight:600;color:var(--br);margin-bottom:5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div><div style="margin-bottom:5px">${badge(r.source,true)}</div><div style="display:flex;align-items:center;justify-content:space-between">${stars(r.rating,false)}${r.cookedCount>0?`<span style="font-size:10px;color:var(--bl);letter-spacing:.3px">${r.cookedCount}回</span>`:""}</div>${V.fIng.length>0&&(r.ingredients||[]).some(i=>V.fIng.includes(i))?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">${(r.ingredients||[]).filter(i=>V.fIng.includes(i)).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col2=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:3px;background:${col2}18;border:1px solid ${col2}44;border-radius:99px;padding:1px 7px;font-size:9px;color:${col2};font-weight:600"><span style="width:4px;height:4px;border-radius:50%;background:${col2};display:inline-block"></span>${esc(i)}</span>`;}).join("")}</div>`:""}</div></div>`;}).join("")}</div>`;}
+
 function filtered(){
   return V.recipes
     .filter(r=>V.fGenre==="すべて"||r.genre===V.fGenre)
@@ -479,22 +471,9 @@ function vHome(){
     ${V.fIng.length>0?`<div style="background:var(--ap);padding:8px 16px;border-bottom:1px solid var(--am)30;display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span style="font-size:10px;color:var(--ad);font-weight:700;letter-spacing:.8px">食材絞り込み中</span>${V.fIng.map(i=>{const cat=V.ingMaster.find(c=>c.items.includes(i));const col=cat?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--wh);border:1px solid ${col}44;border-radius:99px;padding:3px 10px;font-size:11px;color:${col};cursor:pointer" onclick="tFI('${i}')"><span style="width:5px;height:5px;border-radius:50%;background:${col};display:inline-block"></span>${esc(i)} ×</span>`;}).join("")}<button onclick="sv({fIng:[]})" style="background:none;border:none;font-size:11px;color:var(--bl);cursor:pointer;margin-left:auto;letter-spacing:.3px">クリア</button></div>`:""}
     <div class="srow">${chip("すべて",V.fSrc==="all","sv({fSrc:'all'})")}${SOURCES.map(s=>chip(s.label,V.fSrc===s.id,"sv({fSrc:'"+s.id+"'})")).join("")}</div>
     <div class="srow">${GENRES.map(g=>chip(g,V.fGenre===g,"sv({fGenre:'"+g.replace(/'/g,"\\'")+`'})`)).join("")}</div>
-    <div style="background:var(--b2);padding:7px 16px;border-bottom:1px solid var(--b3);font-size:11px;color:var(--bl);letter-spacing:.3px">${V.recipes.length}件のレシピ　·　表示中 ${fl.length}件</div>
-    <div style="flex:1;padding:14px;padding-bottom:84px">
-      ${fl.length===0?`<div style="text-align:center;padding:64px 20px;color:var(--bl)"><div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px"><span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span><span class="serif" style="font-size:15px;color:var(--b4);font-style:italic">No Recipes Yet</span><span style="display:inline-block;width:24px;height:1px;background:var(--b3)"></span></div><div style="font-size:13px;color:var(--bl)">右下のボタンからレシピを追加してください</div></div>`:`
-      <div class="g2">${fl.map(r=>{const mainIng=r.ingredients?.[0];const cat=V.ingMaster.find(c=>c.items.includes(mainIng));const accentColor=cat?.color||"var(--b3)";
-        return`<div class="card" onclick="openDetail('${r.id}')">
-          <div style="position:relative">
-            ${r.thumbnail?`<img src="${esc(r.thumbnail)}" style="width:100%;aspect-ratio:4/3;object-fit:cover;background:var(--b2);display:block" loading="lazy">`:`<div style="width:100%;aspect-ratio:4/3;background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px"><div style="display:flex;gap:4px">${(r.ingredients||[]).slice(0,3).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));return`<span style="width:10px;height:10px;border-radius:50%;background:${c2?.color||"var(--b3)"}"></span>`;}).join("")}</div><span class="serif" style="font-size:11px;color:var(--b4);font-style:italic">${esc(r.genre)}</span></div>`}
-            <div style="position:absolute;top:0;left:0;width:3px;height:100%;background:${accentColor};opacity:.8"></div>
-          </div>
-          <div style="padding:10px 12px 12px">
-            <div style="font-size:13px;font-weight:600;color:var(--br);margin-bottom:5px;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${esc(r.title)}</div>
-            <div style="margin-bottom:5px">${badge(r.source,true)}</div>
-            <div style="display:flex;align-items:center;justify-content:space-between">${stars(r.rating,false)}${r.cookedCount>0?`<span style="font-size:10px;color:var(--bl);letter-spacing:.3px">${r.cookedCount}回</span>`:""}</div>
-            ${V.fIng.length>0&&(r.ingredients||[]).some(i=>V.fIng.includes(i))?`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:3px">${(r.ingredients||[]).filter(i=>V.fIng.includes(i)).map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col2=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:3px;background:${col2}18;border:1px solid ${col2}44;border-radius:99px;padding:1px 7px;font-size:9px;color:${col2};font-weight:600"><span style="width:4px;height:4px;border-radius:50%;background:${col2};display:inline-block"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
-          </div>
-        </div>`;}).join("")}</div>`}
+    <div id="_rc" style="background:var(--b2);padding:7px 16px;border-bottom:1px solid var(--b3);font-size:11px;color:var(--bl);letter-spacing:.3px">${V.recipes.length}件のレシピ　·　表示中 ${fl.length}件</div>
+    <div id="_rl" style="flex:1;padding:14px;padding-bottom:84px">
+      ${recListHtml(fl)}
     </div>
     <button class="fab" onclick="goAdd()">＋</button>
     ${navBar("home")}
