@@ -14,7 +14,7 @@
 :root{
   --b1:#F7F6F3;--b2:#EEECEA;--b3:#DEDAD4;--b4:#B0ADA6;--b5:#888480;
   --br:#1C1B19;--bm:#3E3C3A;--bl:#888480;
-  --am:#1C1B19;--al:#3E3C3A;--ad:#000000;--ap:#EEECEA;
+  --am:#28382C;--al:#3E5440;--ad:#1A2A1E;--ap:#EBF0EC;
   --rd:#7A3020;--rdp:#F4ECEA;--wh:#FFFFFF;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
@@ -27,17 +27,17 @@ input,select,textarea,button{font-family:'Noto Sans JP',sans-serif;color:var(--b
 .srow{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;background:var(--wh);border-bottom:1px solid var(--b3);scrollbar-width:none}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px}
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:500;display:flex;align-items:flex-end}
-.mbox{background:var(--wh);border-radius:0;width:100%;max-width:430px;margin:0 auto;max-height:84vh;display:flex;flex-direction:column;border-top:2px solid var(--br)}
+.mbox{background:var(--wh);border-radius:0;width:100%;max-width:430px;margin:0 auto;max-height:84vh;display:flex;flex-direction:column;border-top:2px solid var(--am)}
 .bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--wh);border-top:1px solid var(--b3);display:flex;z-index:200}
-.fab{position:fixed;bottom:72px;right:max(16px,calc(50% - 200px));background:var(--br);color:var(--wh);border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;z-index:150}
+.fab{position:fixed;bottom:72px;right:max(16px,calc(50% - 200px));background:var(--am);color:var(--wh);border:none;border-radius:50%;width:52px;height:52px;font-size:22px;cursor:pointer;box-shadow:0 2px 10px rgba(40,56,44,.25);display:flex;align-items:center;justify-content:center;z-index:150}
 .chip{border:1px solid var(--b3);background:var(--wh);color:var(--bm);border-radius:99px;padding:5px 14px;font-size:12px;font-weight:300;cursor:pointer;white-space:nowrap}
-.on{border-color:var(--br)!important;background:var(--br)!important;color:var(--wh)!important}
+.on{border-color:var(--am)!important;background:var(--am)!important;color:var(--wh)!important}
 .card{background:var(--wh);border-radius:0;overflow:hidden;box-shadow:none;cursor:pointer;border:1px solid var(--b3)}
 .fi{width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:0;font-size:16px;background:var(--wh);color:var(--br);outline:none;display:block}
-.fi:focus{border-color:var(--br)}
+.fi:focus{border-color:var(--am)}
 textarea.fi{resize:vertical;min-height:80px}
 .lbl{font-size:10px;font-weight:400;color:var(--b5);margin-bottom:6px;display:block;letter-spacing:1.5px;text-transform:uppercase}
-.btn{background:var(--br);color:var(--wh);border:none;border-radius:0;padding:14px 16px;font-size:14px;font-weight:400;cursor:pointer;width:100%;display:block;text-align:center;letter-spacing:.8px}
+.btn{background:var(--am);color:var(--wh);border:none;border-radius:0;padding:14px 16px;font-size:14px;font-weight:400;cursor:pointer;width:100%;display:block;text-align:center;letter-spacing:.8px}
 .btn.sec{background:var(--wh);color:var(--bm);border:1px solid var(--b3)}
 .btn.danger{background:var(--rdp);color:var(--rd);border:1px solid #D4A8A0}
 .btn:disabled{background:var(--b3);color:var(--bl);cursor:not-allowed}
@@ -134,9 +134,9 @@ function renderAuth(){
   let html=`<div style="min-height:100vh;background:var(--b1);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px">
     <div style="width:100%;max-width:360px">
     <div style="text-align:center;margin-bottom:40px">
-      <div style="font-size:13px;color:var(--br);letter-spacing:4px;font-weight:400">MY RECIPE BOOK</div>
-      <div style="width:20px;height:1px;background:var(--b4);margin:14px auto 12px"></div>
-      <div style="font-size:11px;color:var(--bl);letter-spacing:.5px">${authMode==="login"?"おかえりなさい":authMode==="register"?"アカウントを作成":"パスワードを再設定"}</div>
+      <div style="font-size:22px;color:var(--br);letter-spacing:4px;font-weight:400">MY RECIPE BOOK</div>
+      <div style="width:20px;height:1px;background:var(--b4);margin:16px auto 14px"></div>
+      <div style="font-size:12px;color:var(--bl);letter-spacing:.5px;line-height:1.8">${authMode==="login"?"さあ、今夜は何を作ろうか。":authMode==="register"?"レシピ帳を、はじめよう。":"パスワードをリセット"}</div>
     </div>
     <div style="background:var(--wh);padding:32px 28px;border:1px solid var(--b3)">`;
 
@@ -589,7 +589,7 @@ function render(){
   else if(V.view==="add"||V.view==="edit")el.innerHTML=vAdd();
   else if(V.view==="fridge")el.innerHTML=vFridge();
   window.scrollTo(0,sY);
-  if(fId){const el2=document.getElementById(fId);if(el2){el2.focus();try{if(el2.setSelectionRange&&fSS!=null)el2.setSelectionRange(fSS,fSE);}catch{}}}
+  if(fId&&V.view!=="add"&&V.view!=="edit"){const el2=document.getElementById(fId);if(el2){el2.focus();try{if(el2.setSelectionRange&&fSS!=null)el2.setSelectionRange(fSS,fSE);}catch{}}}
 }
 render();
 </script>
