@@ -46,6 +46,10 @@ textarea.fi{resize:vertical;min-height:80px}
 .pw-wrap input{width:100%;padding-right:46px}
 .pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--bl);font-size:16px;padding:4px;line-height:1}
 </style>
+<!-- Firebase SDK（クロスデバイス同期用） -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <div class="app" id="app"></div>
@@ -81,24 +85,28 @@ const SEED=[
 ];
 
 const DBK="rb_v6",SSK="rb_s6";
-function dbl(){
-  try{
-    const d=localStorage.getItem(DBK);
-    if(d)return JSON.parse(d);
-    // 古いバージョンのデータを移行
-    const OLD=["rb_eg_v1","rb_pr_v1","rb_v5","rb_v4","recipeBook_data_v2","recipeBook_widget_v1","rb_data"];
-    for(const k of OLD){try{const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(p&&p.users){localStorage.setItem(DBK,o);return p;}}}catch{}}
-    return null;
-  }catch{return null;}
+// ── Firebase 設定（クロスデバイス同期を有効にするには以下を入力してください） ──
+const FB_CONFIG={apiKey:"AIzaSyDBjG-M23a_lDcs39AmFGksg40YB1595rc",authDomain:"my-recipe-book-23b9d.firebaseapp.com",projectId:"my-recipe-book-23b9d",storageBucket:"my-recipe-book-23b9d.firebasestorage.app",messagingSenderId:"25316205052",appId:"1:25316205052:web:c69b73f057b6d51b61d279"};
+const FB_ON=!!FB_CONFIG.apiKey;
+let fbAuth=null,fbDB=null,_fbReady=!FB_ON;
+if(FB_ON){
+  firebase.initializeApp(FB_CONFIG);
+  fbAuth=firebase.auth();
+  fbDB=firebase.firestore();
 }
-function dbs(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch{}}
-let DB=dbl();
-if(!DB){DB={recipes:JSON.parse(JSON.stringify(SEED)),users:[],ingMaster:JSON.parse(JSON.stringify(DEFING))};dbs(DB);}
-if(!DB.ingMaster){DB.ingMaster=JSON.parse(JSON.stringify(DEFING));dbs(DB);}
-if(!DB.users){DB.users=[];dbs(DB);}
+function dbl_local(){try{const d=localStorage.getItem(DBK);if(d)return JSON.parse(d);const OLD=["rb_eg_v1","rb_pr_v1","rb_v5","rb_v4","recipeBook_data_v2","recipeBook_widget_v1","rb_data"];for(const k of OLD){try{const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(p&&p.users){localStorage.setItem(DBK,o);return p;}}}catch{}}return null;}catch{return null;}}
+function dbs_local(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch{}}
+function dbs(d){dbs_local(d);if(FB_ON&&fbDB&&U?.uid)fbDB.collection("rb").doc(U.uid).set({recipes:d.recipes,ingMaster:d.ingMaster,name:U.name||""}).catch(()=>{});}
+let DB=dbl_local();
+if(!DB){DB={recipes:JSON.parse(JSON.stringify(SEED)),users:[],ingMaster:JSON.parse(JSON.stringify(DEFING))};dbs_local(DB);}
+if(!DB.ingMaster){DB.ingMaster=JSON.parse(JSON.stringify(DEFING));dbs_local(DB);}
+if(!DB.users){DB.users=[];dbs_local(DB);}
+async function _loadFB(user){try{const doc=await fbDB.collection("rb").doc(user.uid).get();if(doc.exists){const d=doc.data();DB={recipes:d.recipes||[],ingMaster:d.ingMaster||JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:d.name||user.email};}else{DB={recipes:JSON.parse(JSON.stringify(SEED)),ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:user.email};}}catch{DB={recipes:[],ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:user.email};}}
+function _fbErrMsg(c){if(c==="auth/user-not-found"||c==="auth/wrong-password"||c==="auth/invalid-credential")return"メールアドレスまたはパスワードが違います";if(c==="auth/email-already-in-use")return"このメールアドレスはすでに登録されています";if(c==="auth/invalid-email")return"メールアドレスの形式が正しくありません";if(c==="auth/too-many-requests")return"ログイン試行回数が多すぎます。しばらくしてからお試しください";return"エラーが発生しました（"+c+"）";}
 
 let U=null;
-try{const s=sessionStorage.getItem(SSK);if(s){const u=JSON.parse(s);const f=DB.users.find(x=>x.email===u.email);if(f)U=f;}}catch{}
+if(!FB_ON){try{const s=sessionStorage.getItem(SSK);if(s){const u=JSON.parse(s);const f=DB.users.find(x=>x.email===u.email);if(f)U=f;}}catch{}}
+else{fbAuth.onAuthStateChanged(async(user)=>{if(user){await _loadFB(user);_fbReady=true;V.view="home";V.recipes=[...DB.recipes];V.ingMaster=[...DB.ingMaster];render();}else{_fbReady=true;U=null;V.view="login";render();}});}
 
 // ── 認証はDOMから直接値を読む（再描画でリセットしない） ──
 let authMode="login"; // login | register | reset
@@ -142,16 +150,14 @@ function renderAuth(){
   if(authMode==="reset"){
     html+=`
       <div style="font-size:13px;color:var(--bm);margin-bottom:14px;line-height:1.7">
-        登録時のメールアドレスを入力してください。新しいパスワードを設定できます。
+        ${FB_ON?"登録時のメールアドレスを入力してください。パスワードリセットメールをお送りします。":"登録時のメールアドレスを入力してください。新しいパスワードを設定できます。"}
       </div>
       <div style="margin-bottom:12px">
         <input id="reset_email" class="fi" placeholder="メールアドレス" type="email" style="margin-bottom:0">
       </div>
-      <div style="margin-bottom:12px">
-        <input id="reset_newpw" class="fi" placeholder="新しいパスワード（6文字以上）" type="${showPw?"text":"password"}" style="margin-bottom:0;padding-right:46px">
-      </div>
-      ${resetMsg?`<div style="color:${resetMsg.includes("完了")||resetMsg.includes("変更")?"#2E7D32":"var(--rd)"};font-size:13px;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:${resetMsg.includes("完了")||resetMsg.includes("変更")?"#EEF5EA":"var(--rdp)"};border:1px solid ${resetMsg.includes("完了")||resetMsg.includes("変更")?"#A8D5A8":"#DDB8B0"}">${resetMsg}</div>`:""}
-      <button class="btn" onclick="doReset()" style="margin-bottom:10px">パスワードを変更する</button>
+      ${!FB_ON?`<div style="margin-bottom:12px"><input id="reset_newpw" class="fi" placeholder="新しいパスワード（6文字以上）" type="${showPw?"text":"password"}" style="margin-bottom:0;padding-right:46px"></div>`:""}
+      ${resetMsg?`<div style="color:${resetMsg.includes("完了")||resetMsg.includes("変更")||resetMsg.includes("送信")?"#2E7D32":"var(--rd)"};font-size:13px;margin-bottom:12px;padding:10px 14px;border-radius:10px;background:${resetMsg.includes("完了")||resetMsg.includes("変更")||resetMsg.includes("送信")?"#EEF5EA":"var(--rdp)"};border:1px solid ${resetMsg.includes("完了")||resetMsg.includes("変更")||resetMsg.includes("送信")?"#A8D5A8":"#DDB8B0"}">${resetMsg}</div>`:""}
+      <button class="btn" onclick="doReset()" style="margin-bottom:10px">${FB_ON?"リセットメールを送信する":"パスワードを変更する"}</button>
       <button class="btn sec" onclick="setAuthMode('login')">ログインに戻る</button>`;
   } else {
     html+=`
@@ -168,25 +174,26 @@ function renderAuth(){
   }
 
   html+=`
-      <div style="margin-top:18px;font-size:11px;color:var(--b4);text-align:center;letter-spacing:.3px">データはこのブラウザに保存されます</div>
+      <div style="margin-top:18px;font-size:11px;color:var(--b4);text-align:center;letter-spacing:.3px">${FB_ON?"データはクラウドに保存されます（全デバイス共通）":"データはこのブラウザに保存されます"}</div>
     </div>
   </div>`;
   app.innerHTML=html;
 }
 
 window.setAuthMode=(m)=>{authMode=m;lErr="";resetMsg="";renderAuth();};
-window.togglePw=()=>{showPw=!showPw;renderAuth();};
+window.togglePw=()=>{const e=document.getElementById("auth_email")?.value||"";const p=document.getElementById("auth_pw")?.value||"";const n=document.getElementById("auth_name")?.value||"";const re=document.getElementById("reset_email")?.value||"";const rp=document.getElementById("reset_newpw")?.value||"";showPw=!showPw;renderAuth();const ae=document.getElementById("auth_email");if(ae)ae.value=e;const ap=document.getElementById("auth_pw");if(ap)ap.value=p;const an=document.getElementById("auth_name");if(an)an.value=n;const rfe=document.getElementById("reset_email");if(rfe)rfe.value=re;const rfp=document.getElementById("reset_newpw");if(rfp)rfp.value=rp;};
 
 window.doAuth=()=>{
-  const email=(document.getElementById("auth_email")?.value||"").trim();
-  const pw=document.getElementById("auth_pw")?.value||"";
+  if(FB_ON){_doAuthFB();return;}
+  const email=(document.getElementById("auth_email")?.value||"").trim().toLowerCase();
+  const pw=(document.getElementById("auth_pw")?.value||"").trim();
   const name=(document.getElementById("auth_name")?.value||"").trim();
   lErr="";
   if(authMode==="register"){
     if(!name){lErr="お名前を入力してください";renderAuth();return;}
     if(!email){lErr="メールアドレスを入力してください";renderAuth();return;}
     if(pw.length<6){lErr="パスワードは6文字以上にしてください";renderAuth();return;}
-    if(DB.users.find(u=>u.email===email)){lErr="このメールアドレスはすでに登録されています";renderAuth();return;}
+    if(DB.users.find(u=>u.email.toLowerCase()===email)){lErr="このメールアドレスはすでに登録されています";renderAuth();return;}
     const nu={email,password:pw,name};
     DB.users.push(nu);dbs(DB);
     U=nu;sessionStorage.setItem(SSK,JSON.stringify(nu));
@@ -194,18 +201,49 @@ window.doAuth=()=>{
   } else {
     if(!email){lErr="メールアドレスを入力してください";renderAuth();return;}
     if(!pw){lErr="パスワードを入力してください";renderAuth();return;}
-    const fd=DB.users.find(u=>u.email===email&&u.password===pw);
-    if(!fd){lErr="メールアドレスまたはパスワードが違います";renderAuth();return;}
+    const fd=DB.users.find(u=>u.email.toLowerCase()===email&&u.password===pw);
+    if(!fd){
+      if(DB.users.length===0){lErr="このデバイスにはまだアカウントがありません。「新規登録はこちら」からアカウントを作成してください（データはブラウザごとに保存されます）";}
+      else{lErr="メールアドレスまたはパスワードが違います";}
+      renderAuth();return;
+    }
     U=fd;sessionStorage.setItem(SSK,JSON.stringify(fd));
     lErr="";sv({view:"home"});
   }
 };
+async function _doAuthFB(){
+  const email=(document.getElementById("auth_email")?.value||"").trim().toLowerCase();
+  const pw=(document.getElementById("auth_pw")?.value||"").trim();
+  const name=(document.getElementById("auth_name")?.value||"").trim();
+  lErr="";
+  if(authMode==="register"){
+    if(!name){lErr="お名前を入力してください";renderAuth();return;}
+    if(!email){lErr="メールアドレスを入力してください";renderAuth();return;}
+    if(pw.length<6){lErr="パスワードは6文字以上にしてください";renderAuth();return;}
+    try{
+      const uc=await fbAuth.createUserWithEmailAndPassword(email,pw);
+      await fbDB.collection("rb").doc(uc.user.uid).set({recipes:JSON.parse(JSON.stringify(SEED)),ingMaster:JSON.parse(JSON.stringify(DEFING)),name});
+      U={uid:uc.user.uid,email,name};
+      DB={recipes:JSON.parse(JSON.stringify(SEED)),ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};
+      lErr="";sv({view:"home",recipes:[...DB.recipes],ingMaster:[...DB.ingMaster]});
+    }catch(e){lErr=_fbErrMsg(e.code);renderAuth();}
+  }else{
+    if(!email){lErr="メールアドレスを入力してください";renderAuth();return;}
+    if(!pw){lErr="パスワードを入力してください";renderAuth();return;}
+    try{
+      const uc=await fbAuth.signInWithEmailAndPassword(email,pw);
+      await _loadFB(uc.user);
+      lErr="";sv({view:"home",recipes:[...DB.recipes],ingMaster:[...DB.ingMaster]});
+    }catch(e){lErr=_fbErrMsg(e.code);renderAuth();}
+  }
+}
 
 window.doReset=()=>{
-  const email=(document.getElementById("reset_email")?.value||"").trim();
-  const newpw=document.getElementById("reset_newpw")?.value||"";
+  if(FB_ON){_doResetFB();return;}
+  const email=(document.getElementById("reset_email")?.value||"").trim().toLowerCase();
+  const newpw=(document.getElementById("reset_newpw")?.value||"").trim();
   if(!email){resetMsg="メールアドレスを入力してください";renderAuth();return;}
-  const idx=DB.users.findIndex(u=>u.email===email);
+  const idx=DB.users.findIndex(u=>u.email.toLowerCase()===email);
   if(idx===-1){resetMsg="このメールアドレスは登録されていません";renderAuth();return;}
   if(newpw.length<6){resetMsg="新しいパスワードは6文字以上にしてください";renderAuth();return;}
   DB.users[idx].password=newpw;dbs(DB);
@@ -213,8 +251,18 @@ window.doReset=()=>{
   renderAuth();
   setTimeout(()=>{setAuthMode("login");},2000);
 };
+async function _doResetFB(){
+  const email=(document.getElementById("reset_email")?.value||"").trim().toLowerCase();
+  if(!email){resetMsg="メールアドレスを入力してください";renderAuth();return;}
+  try{
+    await fbAuth.sendPasswordResetEmail(email);
+    resetMsg="パスワードリセットメールを送信しました。メールをご確認ください";
+    renderAuth();
+    setTimeout(()=>{setAuthMode("login");},3000);
+  }catch(e){resetMsg="送信に失敗しました（"+e.code+"）";renderAuth();}
+}
 
-window.doLogout=()=>{U=null;sessionStorage.removeItem(SSK);authMode="login";lErr="";sv({view:"login"});};
+window.doLogout=()=>{if(FB_ON&&fbAuth)fbAuth.signOut();U=null;sessionStorage.removeItem(SSK);authMode="login";lErr="";sv({view:"login"});};
 
 // ── 以下は従来の関数群 ────────────────────────────────────────────────────────
 function dSrc(u){if(!u)return"memo";if(u.includes("instagram"))return"instagram";if(u.includes("youtube")||u.includes("youtu.be"))return"youtube";if(u.includes("tiktok"))return"tiktok";if(u.includes("twitter")||u.includes("x.com"))return"twitter";if(u.includes("cookpad"))return"cookpad";if(u.includes("kurashiru"))return"kurashiru";return"website";}
@@ -228,6 +276,8 @@ function navBar(act){return`<div class="bnav">${[["home","一覧","≡"],["add",
 window.setStar=n=>sv({form:{...V.form,rating:n}});
 window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},fStep:1,aiState:"idle",aiMsg:""});
 window.uf=(k,v)=>{V.form={...V.form,[k]:v};render();};
+
+window.updateUrlField=(url)=>{const src=dSrc(url);const th=V.form.thumbnail||(src==="youtube"&&url?ytT(url)||"":"");V.form={...V.form,url,source:src,thumbnail:th};render();};
 
 window.handleUrl=async(url)=>{
   V.form={...V.form,url,source:dSrc(url)};
@@ -348,7 +398,7 @@ function catMod(){
         <label class="lbl">カテゴリカラー</label>
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">${COLORS.map(col=>`<button onclick="sv({cncol:'${col}'})" style="width:32px;height:32px;border-radius:50%;background:${col};border:${V.cncol===col?"3px solid var(--br)":"2px solid transparent"};cursor:pointer"></button>`).join("")}</div>
         <label class="lbl">カテゴリ名</label>
-        <input class="fi" placeholder="例：スパイス、調味料..." value="${esc(V.cnn)}" oninput="sv({cnn:this.value})" style="margin-bottom:14px">
+        <input id="fi_catname" class="fi" placeholder="例：スパイス、調味料..." value="${esc(V.cnn)}" oninput="sv({cnn:this.value})" style="margin-bottom:14px">
         <div style="background:var(--wh);border-radius:12px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--b3);display:flex;align-items:center;gap:10px">
           <span style="width:12px;height:12px;border-radius:50%;background:${V.cncol};display:inline-block;flex-shrink:0"></span>
           <span style="font-weight:500;color:var(--br);font-size:15px">${esc(V.cnn)||"カテゴリ名"}</span>
@@ -388,7 +438,7 @@ function vHome(){
     <div style="background:var(--wh);padding:10px 16px;border-bottom:1px solid var(--b3);display:flex;gap:8px">
       <div style="position:relative;flex:1">
         <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;color:var(--b4)">◎</span>
-        <input placeholder="レシピ名・食材・タグで検索" value="${esc(V.q)}" oninput="sv({q:this.value})" style="width:100%;padding:10px 14px 10px 34px;border:1px solid var(--b3);border-radius:99px;font-size:15px;background:var(--b1);outline:none;box-sizing:border-box;color:var(--br)">
+        <input id="fi_search" placeholder="レシピ名・食材・タグで検索" value="${esc(V.q)}" oninput="sv({q:this.value})" style="width:100%;padding:10px 14px 10px 34px;border:1px solid var(--b3);border-radius:99px;font-size:15px;background:var(--b1);outline:none;box-sizing:border-box;color:var(--br)">
       </div>
       <button onclick="sv({showIM:true})" style="background:${V.fIng.length>0?"var(--am)":"var(--b2)"};color:${V.fIng.length>0?"var(--wh)":"var(--bm)"};border:1px solid ${V.fIng.length>0?"var(--am)":"var(--b3)"};border-radius:99px;padding:0 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;letter-spacing:.3px">食材${V.fIng.length>0?" · "+V.fIng.length:""}</button>
     </div>
@@ -463,7 +513,8 @@ function vAdd(){
           <div style="border:1px solid var(--b3);border-radius:12px;padding:12px 14px;margin-bottom:10px">
             <div style="font-size:10px;font-weight:700;color:var(--b5);margin-bottom:8px;letter-spacing:1.5px">① URL から取得</div>
             <div style="font-size:11px;color:var(--bl);margin-bottom:8px">YouTube · クックパッド · クラシル · 一般 Web サイト</div>
-            <input class="fi" placeholder="https://..." value="${esc(f.url)}" oninput="handleUrl(this.value)" style="font-size:14px;padding:10px 12px;background:var(--b1)">
+            <input id="fi_url" class="fi" placeholder="https://..." value="${esc(f.url)}" oninput="updateUrlField(this.value)" style="font-size:14px;padding:10px 12px;background:var(--b1)">
+            <button onclick="if(V.form.url&&V.form.url.startsWith('http'))handleUrl(V.form.url);else sv({aiState:'error',aiMsg:'URLを入力してください'})" style="width:100%;padding:8px 14px;background:var(--wh);border:1px solid var(--b3);border-radius:10px;color:var(--bm);font-weight:600;font-size:13px;cursor:pointer;margin-top:8px;letter-spacing:.2px">AIで解析する（任意）</button>
           </div>
           <div style="border:1px solid #C2185B28;border-radius:12px;padding:12px 14px;margin-bottom:10px;background:var(--b1)">
             <div style="font-size:10px;font-weight:700;color:#C2185B;margin-bottom:6px;letter-spacing:1.5px">② スクリーンショットから解析</div>
@@ -480,7 +531,7 @@ function vAdd(){
           ${V.aiState!=="idle"?`<div style="margin-top:12px;padding:10px 14px;border-radius:10px;background:${aiBg};font-size:12px;color:${aiColor};letter-spacing:.2px">${V.aiMsg}</div>`:""}
         </div>
         ${th?`<img src="${esc(th)}" style="width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px">`:""}
-        <div style="margin-bottom:14px"><label class="lbl">料理名</label><input class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)"></div>
+        <div style="margin-bottom:14px"><label class="lbl">料理名</label><input id="fi_title" class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
           <div><label class="lbl">ジャンル</label><select class="fi" onchange="uf('genre',this.value)">${GENRES.filter(g=>g!=="すべて").map(g=>`<option ${f.genre===g?"selected":""}>${g}</option>`).join("")}</select></div>
           <div><label class="lbl">参照元</label><select class="fi" onchange="uf('source',this.value)">${SOURCES.map(s=>`<option value="${s.id}" ${f.source===s.id?"selected":""}>${s.label}</option>`).join("")}</select></div>
@@ -499,8 +550,8 @@ function vAdd(){
           <button onclick="sv({showFI:true})" style="width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:12px;font-size:14px;background:var(--wh);color:var(--bm);cursor:pointer;text-align:left;margin-bottom:10px;letter-spacing:.2px">食材を選ぶ（${f.ingredients.length}品目）</button>
           ${f.ingredients.length>0?`<div style="display:flex;flex-wrap:wrap;gap:6px">${f.ingredients.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:5px;background:${col}14;border:1px solid ${col}30;border-radius:99px;padding:4px 12px;font-size:12px;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
         </div>
-        <div style="margin-bottom:14px"><label class="lbl">メモ · 分量 · アレンジ</label><textarea class="fi" oninput="uf('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3。調理のポイント...">${esc(f.memo)}</textarea></div>
-        <div style="margin-bottom:14px"><label class="lbl">タグ（カンマ区切り）</label><input class="fi" placeholder="定番, お弁当, 時短" value="${esc(f.tags)}" oninput="uf('tags',this.value)"></div>
+        <div style="margin-bottom:14px"><label class="lbl">メモ · 分量 · アレンジ</label><textarea id="fi_memo" class="fi" oninput="uf('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3。調理のポイント...">${esc(f.memo)}</textarea></div>
+        <div style="margin-bottom:14px"><label class="lbl">タグ（カンマ区切り）</label><input id="fi_tags" class="fi" placeholder="定番, お弁当, 時短" value="${esc(f.tags)}" oninput="uf('tags',this.value)"></div>
         <div style="margin-bottom:22px"><label class="lbl">評価</label>${stars(f.rating,true)}</div>
         <div style="display:flex;gap:10px">
           <button class="btn sec" style="flex:1" onclick="sv({fStep:1})">戻る</button>
@@ -551,11 +602,15 @@ function vFridge(){
 
 function render(){
   const el=document.getElementById("app");if(!el)return;
-  if(V.view==="login"){renderAuth();return;}
+  if(!_fbReady){el.innerHTML=`<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--b1)"><div style="text-align:center;color:var(--bm);padding:20px"><div style="font-size:32px;margin-bottom:12px">🍳</div><div style="font-size:14px;color:var(--bl);letter-spacing:.5px">読み込み中...</div></div></div>`;return;}
+  const sY=window.scrollY;const foc=document.activeElement;const fId=foc?.id;const fSS=foc?.selectionStart;const fSE=foc?.selectionEnd;
+  if(V.view==="login"){renderAuth();window.scrollTo(0,sY);return;}
   if(V.view==="home")el.innerHTML=vHome();
   else if(V.view==="detail")el.innerHTML=vDetail();
   else if(V.view==="add"||V.view==="edit")el.innerHTML=vAdd();
   else if(V.view==="fridge")el.innerHTML=vFridge();
+  window.scrollTo(0,sY);
+  if(fId){const el2=document.getElementById(fId);if(el2){el2.focus();try{if(el2.setSelectionRange&&fSS!=null)el2.setSelectionRange(fSS,fSE);}catch{}}}
 }
 render();
 </script>
