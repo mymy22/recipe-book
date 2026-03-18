@@ -367,8 +367,8 @@ window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:
 window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
 window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
 window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[]},fStep:1,aiState:"idle",aiMsg:""});};
-window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];setTimeout(()=>{const mb=document.querySelector('.mbox');if(mb){const t=document.createElement('div');t.innerHTML=iMod(V.fIng,'tFI','sv({showIM:false})',V.imc,'sv({imc:');const nb=t.querySelector('.mbox');if(nb)mb.innerHTML=nb.innerHTML;}},0);};
-window.tFmI=i=>{const ings=V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i];V.form={...V.form,ingredients:ings};setTimeout(()=>{const mb=document.querySelector('.mbox');if(mb){const t=document.createElement('div');t.innerHTML=iMod(ings,'tFmI','sv({showFI:false})',V.fic,'sv({fic:');const nb=t.querySelector('.mbox');if(nb)mb.innerHTML=nb.innerHTML;}},0);};
+window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];setTimeout(render,0);};
+window.tFmI=i=>{const ings=V.form.ingredients.includes(i)?V.form.ingredients.filter(x=>x!==i):[...V.form.ingredients,i];V.form={...V.form,ingredients:ings};setTimeout(render,0);};
 window.addItem=catId=>{const el=document.getElementById("nii_"+catId);if(!el||!el.value.trim())return;const item=el.value.trim();el.value="";V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:[...c.items,item]}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:[...V.cme.items,item]}:V.cme;render();};
 window.delItem=(catId,item)=>{V.ingMaster=V.ingMaster.map(c=>c.id===catId?{...c,items:c.items.filter(i=>i!==item)}:c);DB.ingMaster=V.ingMaster;dbs(DB);V.cme=V.cme?.id===catId?{...V.cme,items:V.cme.items.filter(i=>i!==item)}:V.cme;render();};
 window.toggleCE=id=>sv({cme:V.cme?.id===id?null:V.ingMaster.find(c=>c.id===id)});
@@ -383,7 +383,7 @@ function iMod(sel,onT,onC,ac0,sAC){
       <button class="btn" style="width:auto;padding:8px 20px;font-size:14px" onclick="${onC}">完了</button>
     </div>
     <div class="srow" style="flex-shrink:0">
-      ${V.ingMaster.map(x=>`<button onclick="${sAC}('${x.id}')" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}</button>`).join("")}
+      ${V.ingMaster.map(x=>`<button onclick="${sAC}'${x.id}'})" style="display:inline-flex;align-items:center;gap:5px;border:1px solid ${ac===x.id?x.color:"var(--b3)"};background:${ac===x.id?x.color+"18":"var(--wh)"};color:${ac===x.id?x.color:"var(--bm)"};border-radius:99px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap"><span style="width:7px;height:7px;border-radius:50%;background:${x.color};flex-shrink:0;display:inline-block"></span>${x.name}</button>`).join("")}
     </div>
     <div style="overflow-y:auto;padding:14px 16px 20px;flex:1">
       <div id="_il" style="display:flex;flex-wrap:wrap;gap:8px">
