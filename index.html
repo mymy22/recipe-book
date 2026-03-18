@@ -88,7 +88,7 @@ const DBK="rb_v6",SSK="rb_s6";
 // ── Firebase 設定（クロスデバイス同期を有効にするには以下を入力してください） ──
 const FB_CONFIG={apiKey:"AIzaSyDBjG-M23a_lDcs39AmFGksg4OYB1595rc",authDomain:"my-recipe-book-23b9d.firebaseapp.com",projectId:"my-recipe-book-23b9d",storageBucket:"my-recipe-book-23b9d.firebasestorage.app",messagingSenderId:"25316205052",appId:"1:25316205052:web:c69b73f057b6d51b61d279"};
 const FB_ON=!!FB_CONFIG.apiKey;
-let fbAuth=null,fbDB=null,_fbReady=!FB_ON;
+let fbAuth=null,fbDB=null,_fbReady=!FB_ON,_composing=false;
 if(FB_ON){
   firebase.initializeApp(FB_CONFIG);
   fbAuth=firebase.auth();
@@ -275,7 +275,9 @@ function navBar(act){return`<div class="bnav">${[["home","一覧","≡"],["add",
 
 window.setStar=n=>sv({form:{...V.form,rating:n}});
 window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},fStep:1,aiState:"idle",aiMsg:""});
-window.uf=(k,v)=>{V.form={...V.form,[k]:v};render();};
+window.uf=(k,v)=>{V.form={...V.form,[k]:v};if(!_composing)render();};
+window.startCompose=()=>{_composing=true;};
+window.endCompose=(k,v)=>{_composing=false;V.form={...V.form,[k]:v};render();};
 
 window.updateUrlField=(url)=>{const src=dSrc(url);const th=V.form.thumbnail||(src==="youtube"&&url?ytT(url)||"":"");V.form={...V.form,url,source:src,thumbnail:th};render();};
 
@@ -531,7 +533,7 @@ function vAdd(){
           ${V.aiState!=="idle"?`<div style="margin-top:12px;padding:10px 14px;border-radius:10px;background:${aiBg};font-size:12px;color:${aiColor};letter-spacing:.2px">${V.aiMsg}</div>`:""}
         </div>
         ${th?`<img src="${esc(th)}" style="width:100%;border-radius:14px;aspect-ratio:16/9;object-fit:cover;margin-bottom:16px">`:""}
-        <div style="margin-bottom:14px"><label class="lbl">料理名</label><input id="fi_title" class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)"></div>
+        <div style="margin-bottom:14px"><label class="lbl">料理名</label><input id="fi_title" class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)" oncompositionstart="startCompose()" oncompositionend="endCompose('title',this.value)"></div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px">
           <div><label class="lbl">ジャンル</label><select class="fi" onchange="uf('genre',this.value)">${GENRES.filter(g=>g!=="すべて").map(g=>`<option ${f.genre===g?"selected":""}>${g}</option>`).join("")}</select></div>
           <div><label class="lbl">参照元</label><select class="fi" onchange="uf('source',this.value)">${SOURCES.map(s=>`<option value="${s.id}" ${f.source===s.id?"selected":""}>${s.label}</option>`).join("")}</select></div>
@@ -550,8 +552,8 @@ function vAdd(){
           <button onclick="sv({showFI:true})" style="width:100%;padding:12px 14px;border:1px solid var(--b3);border-radius:12px;font-size:14px;background:var(--wh);color:var(--bm);cursor:pointer;text-align:left;margin-bottom:10px;letter-spacing:.2px">食材を選ぶ（${f.ingredients.length}品目）</button>
           ${f.ingredients.length>0?`<div style="display:flex;flex-wrap:wrap;gap:6px">${f.ingredients.map(i=>{const c2=V.ingMaster.find(x=>x.items.includes(i));const col=c2?.color||"var(--b4)";return`<span style="display:inline-flex;align-items:center;gap:5px;background:${col}14;border:1px solid ${col}30;border-radius:99px;padding:4px 12px;font-size:12px;color:${col}"><span style="width:6px;height:6px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0"></span>${esc(i)}</span>`;}).join("")}</div>`:""}
         </div>
-        <div style="margin-bottom:14px"><label class="lbl">メモ · 分量 · アレンジ</label><textarea id="fi_memo" class="fi" oninput="uf('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3。調理のポイント...">${esc(f.memo)}</textarea></div>
-        <div style="margin-bottom:14px"><label class="lbl">タグ（カンマ区切り）</label><input id="fi_tags" class="fi" placeholder="定番, お弁当, 時短" value="${esc(f.tags)}" oninput="uf('tags',this.value)"></div>
+        <div style="margin-bottom:14px"><label class="lbl">メモ · 分量 · アレンジ</label><textarea id="fi_memo" class="fi" oninput="uf('memo',this.value)" oncompositionstart="startCompose()" oncompositionend="endCompose('memo',this.value)" placeholder="砂糖大さじ2、醤油大さじ3。調理のポイント...">${esc(f.memo)}</textarea></div>
+        <div style="margin-bottom:14px"><label class="lbl">タグ（カンマ区切り）</label><input id="fi_tags" class="fi" placeholder="定番, お弁当, 時短" value="${esc(f.tags)}" oninput="uf('tags',this.value)" oncompositionstart="startCompose()" oncompositionend="endCompose('tags',this.value)"></div>
         <div style="margin-bottom:22px"><label class="lbl">評価</label>${stars(f.rating,true)}</div>
         <div style="display:flex;gap:10px">
           <button class="btn sec" style="flex:1" onclick="sv({fStep:1})">戻る</button>
