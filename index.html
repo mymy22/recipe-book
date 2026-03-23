@@ -43,12 +43,10 @@ textarea.fi{resize:vertical;min-height:80px}
 .btn.sec{background:var(--wh);color:var(--bm);border:1px solid var(--b3)}
 .btn.danger{background:var(--rdp);color:var(--rd);border:1px solid #D4A8A0}
 .btn:disabled{background:var(--b3);color:var(--bl);cursor:not-allowed}
-/* パスワード表示トグル */
 .pw-wrap{position:relative;margin-bottom:12px}
 .pw-wrap input{width:100%;padding-right:46px}
 .pw-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--bl);font-size:16px;padding:4px;line-height:1}
 </style>
-<!-- Firebase SDK（クロスデバイス同期用） -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -87,7 +85,6 @@ const SEED=[
 ];
 
 const DBK="rb_v6",SSK="rb_s6";
-// ── Firebase 設定（クロスデバイス同期を有効にするには以下を入力してください） ──
 const FB_CONFIG={apiKey:"AIzaSyDBjG-M23a_lDcs39AmFGksg4OYB1595rc",authDomain:"my-recipe-book-23b9d.firebaseapp.com",projectId:"my-recipe-book-23b9d",storageBucket:"my-recipe-book-23b9d.firebasestorage.app",messagingSenderId:"25316205052",appId:"1:25316205052:web:c69b73f057b6d51b61d279"};
 const FB_ON=!!FB_CONFIG.apiKey;
 let fbAuth=null,fbDB=null,_fbReady=!FB_ON,_composing=false;
@@ -96,22 +93,108 @@ if(FB_ON){
   fbAuth=firebase.auth();
   fbDB=firebase.firestore();
 }
+
 function dbl_local(){try{const d=localStorage.getItem(DBK);if(d)return JSON.parse(d);const OLD=["rb_eg_v1","rb_pr_v1","rb_v5","rb_v4","recipeBook_data_v2","recipeBook_widget_v1","rb_data"];for(const k of OLD){try{const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(p&&p.users){localStorage.setItem(DBK,o);return p;}}}catch{}}return null;}catch{return null;}}
-function dbs_local(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch{}}
-function dbs(d){dbs_local(d);if(FB_ON&&fbDB&&U?.uid)fbDB.collection("rb").doc(U.uid).set({recipes:d.recipes,ingMaster:d.ingMaster,name:U.name||""}).catch(()=>{});}
+function dbs_local(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch(e){console.error("localStorage保存失敗:",e);}}
+
+// ── [FIX] Firestoreへの保存を非同期・エラー可視化・photos除外に修正 ──
+async function dbs_remote(d){
+  if(!FB_ON||!fbDB||!U?.uid)return;
+  // photosはbase64でサイズが大きくFirestoreの1MB制限を超えるため除外
+  const recipesForFirestore=d.recipes.map(r=>{
+    const {photos,...rest}=r;
+    return rest;
+  });
+  try{
+    await fbDB.collection("rb").doc(U.uid).set({
+      recipes:recipesForFirestore,
+      ingMaster:d.ingMaster,
+      name:U.name||""
+    });
+  }catch(e){
+    console.error("Firestore保存エラー:",e);
+    // ローカルには保存済みなのでユーザーへ通知
+    showSaveError();
+  }
+}
+
+let _saveErrTimer=null;
+function showSaveError(){
+  let banner=document.getElementById("_save_err");
+  if(!banner){
+    banner=document.createElement("div");
+    banner.id="_save_err";
+    banner.style.cssText="position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#7A3020;color:#fff;text-align:center;padding:10px 16px;font-size:12px;z-index:9999;letter-spacing:.3px";
+    banner.textContent="クラウド同期に失敗しました。データはこの端末に保存されています。";
+    document.body.appendChild(banner);
+  }
+  clearTimeout(_saveErrTimer);
+  _saveErrTimer=setTimeout(()=>{banner.remove();},4000);
+}
+
+// ローカル保存 + Firestoreへの非同期保存（photosはローカルのみ）
+function dbs(d){
+  dbs_local(d); // ローカルには常にフルデータ（photos含む）を保存
+  dbs_remote(d); // Firestoreには非同期で保存（photos除外）
+}
+
 let DB=dbl_local();
 if(!DB){DB={recipes:JSON.parse(JSON.stringify(SEED)),users:[],ingMaster:JSON.parse(JSON.stringify(DEFING))};dbs_local(DB);}
 if(!DB.ingMaster){DB.ingMaster=JSON.parse(JSON.stringify(DEFING));dbs_local(DB);}
 if(!DB.users){DB.users=[];dbs_local(DB);}
-async function _loadFB(user){try{const doc=await fbDB.collection("rb").doc(user.uid).get();if(doc.exists){const d=doc.data();DB={recipes:d.recipes||[],ingMaster:d.ingMaster||JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:d.name||user.email};}else{DB={recipes:JSON.parse(JSON.stringify(SEED)),ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:user.email};}}catch{DB={recipes:[],ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};U={uid:user.uid,email:user.email,name:user.email};}}
+
+// ── [FIX] FirestoreのデータをローカルのphotosとマージしてDBを構築 ──
+async function _loadFB(user){
+  try{
+    const doc=await fbDB.collection("rb").doc(user.uid).get();
+    if(doc.exists){
+      const d=doc.data();
+      // Firestoreのレシピにローカルのphotosをマージ（photosはローカルにのみ存在）
+      const localDB=dbl_local();
+      const localPhotosMap={};
+      if(localDB?.recipes){
+        localDB.recipes.forEach(r=>{if(r.photos&&r.photos.length>0)localPhotosMap[r.id]=r.photos;});
+      }
+      const mergedRecipes=(d.recipes||[]).map(r=>({
+        ...r,
+        photos:localPhotosMap[r.id]||[]
+      }));
+      DB={
+        recipes:mergedRecipes,
+        ingMaster:d.ingMaster||JSON.parse(JSON.stringify(DEFING)),
+        users:[]
+      };
+      U={uid:user.uid,email:user.email,name:d.name||user.email};
+    }else{
+      DB={recipes:JSON.parse(JSON.stringify(SEED)),ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};
+      U={uid:user.uid,email:user.email,name:user.email};
+      // 新規ユーザーの初期データをFirestoreに保存
+      await fbDB.collection("rb").doc(user.uid).set({
+        recipes:JSON.parse(JSON.stringify(SEED)),
+        ingMaster:JSON.parse(JSON.stringify(DEFING)),
+        name:user.email
+      });
+    }
+  }catch(e){
+    console.error("Firestore読み込みエラー:",e);
+    // Firestoreが読めない場合はローカルデータにフォールバック
+    const localDB=dbl_local();
+    if(localDB){
+      DB=localDB;
+    }else{
+      DB={recipes:[],ingMaster:JSON.parse(JSON.stringify(DEFING)),users:[]};
+    }
+    U={uid:user.uid,email:user.email,name:user.email};
+  }
+}
+
 function _fbErrMsg(c){if(c==="auth/user-not-found"||c==="auth/wrong-password"||c==="auth/invalid-credential")return"メールアドレスまたはパスワードが違います";if(c==="auth/email-already-in-use")return"このメールアドレスはすでに登録されています";if(c==="auth/invalid-email")return"メールアドレスの形式が正しくありません";if(c==="auth/too-many-requests")return"ログイン試行回数が多すぎます。しばらくしてからお試しください";return"エラーが発生しました（"+c+"）";}
 
 let U=null;
 if(!FB_ON){try{const s=sessionStorage.getItem(SSK);if(s){const u=JSON.parse(s);const f=DB.users.find(x=>x.email===u.email);if(f)U=f;}}catch{}}
 else{fbAuth.onAuthStateChanged(async(user)=>{if(user){await _loadFB(user);_fbReady=true;V.view="home";V.recipes=[...DB.recipes];V.ingMaster=[...DB.ingMaster];render();}else{_fbReady=true;U=null;V.view="login";render();}});}
 
-// ── 認証はDOMから直接値を読む（再描画でリセットしない） ──
-let authMode="login"; // login | register | reset
+let authMode="login";
 let showPw=false;
 let lErr="";
 let resetMsg="";
@@ -260,7 +343,6 @@ async function _doResetFB(){
 
 window.doLogout=()=>{if(FB_ON&&fbAuth)fbAuth.signOut();U=null;sessionStorage.removeItem(SSK);authMode="login";lErr="";sv({view:"login"});};
 
-// ── 以下は従来の関数群 ────────────────────────────────────────────────────────
 function dSrc(u){if(!u)return"memo";if(u.includes("instagram"))return"instagram";if(u.includes("youtube")||u.includes("youtu.be"))return"youtube";if(u.includes("tiktok"))return"tiktok";if(u.includes("twitter")||u.includes("x.com"))return"twitter";if(u.includes("cookpad"))return"cookpad";if(u.includes("kurashiru"))return"kurashiru";return"website";}
 function ytT(u){const m=u.match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);return m?"https://img.youtube.com/vi/"+m[1]+"/hqdefault.jpg":null;}
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
@@ -270,7 +352,7 @@ function chip(l,on,oc){return`<button class="chip${on?" on":""}" onclick="${oc}"
 function navBar(act){return`<div class="bnav">${[["home","一覧","≡"],["add","追加","＋"],["fridge","冷蔵庫","▦"]].map(([v,lb,ic])=>`<button onclick="${v==="add"?"goAdd()":"sv({view:'"+v+"'})"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0 10px;gap:2px;background:none;border:none;cursor:pointer;color:${act===v?"var(--br)":"var(--b4)"}"><span style="font-size:18px;line-height:1;font-weight:300">${ic}</span><span style="font-size:10px;letter-spacing:.5px;font-weight:300">${lb}</span></button>`).join("")}</div>`;}
 
 window.setStar=n=>sv({form:{...V.form,rating:n}});
-window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[]},fStep:1,aiState:"idle",aiMsg:""});
+window.goAdd=()=>sv({view:"add",sel:null,form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[],photos:[]},fStep:1,aiState:"idle",aiMsg:""});
 window.uf=(k,v)=>{V.form={...V.form,[k]:v};};
 window.startCompose=()=>{};
 window.endCompose=(k,v)=>{V.form={...V.form,[k]:v};};
@@ -348,6 +430,7 @@ window.analyzeText=async()=>{
   }catch{sv({aiState:"error",aiMsg:"エラーが発生しました"});}
 };
 
+// ── [FIX] doSave: 保存前にDB.recipesの整合性を確認 ──
 window.doSave=()=>{
   const titleEl=document.getElementById('fi_title');const memoEl=document.getElementById('fi_memo');const tagsEl=document.getElementById('fi_tags');
   if(titleEl)V.form={...V.form,title:titleEl.value};
@@ -358,13 +441,25 @@ window.doSave=()=>{
   const th=f.thumbnail||(f.url&&dSrc(f.url)==="youtube"?ytT(f.url):"")||"";
   const data={title:f.title,genre:f.genre,source:f.source,url:f.url||"",memo:f.memo||"",tags,rating:f.rating,thumbnail:th,ingredients:f.ingredients,photos:f.photos||[]};
   if(V.sel&&V.view==="edit"){
-    DB.recipes=DB.recipes.map(r=>r.id===V.sel.id?{...r,...data}:r);dbs(DB);
+    // [FIX] 編集時: DB.recipesが空の場合V.recipesから復元して保存
+    if(DB.recipes.length===0&&V.recipes.length>0){
+      DB.recipes=[...V.recipes];
+    }
+    DB.recipes=DB.recipes.map(r=>r.id===V.sel.id?{...r,...data}:r);
+    dbs(DB);
     sv({recipes:[...DB.recipes],sel:{...V.sel,...data},view:"detail",saving:false,aiState:"idle",aiMsg:""});
   }else{
     const nr={id:Date.now().toString(),...data,cookedCount:0,createdAt:Date.now()};
-    DB.recipes=[nr,...DB.recipes];dbs(DB);sv({recipes:[...DB.recipes],view:"home",saving:false,aiState:"idle",aiMsg:""});
+    // [FIX] 新規追加時: DB.recipesが空の場合V.recipesから復元して保存
+    if(DB.recipes.length===0&&V.recipes.length>0){
+      DB.recipes=[...V.recipes];
+    }
+    DB.recipes=[nr,...DB.recipes];
+    dbs(DB);
+    sv({recipes:[...DB.recipes],view:"home",saving:false,aiState:"idle",aiMsg:""});
   }
 };
+
 window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:"detail"});};
 window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
 window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
