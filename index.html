@@ -54,6 +54,21 @@ textarea.fi{resize:vertical;min-height:80px}
 <body>
 <div class="app" id="app"></div>
 <script>
+
+// ── Cloudinary設定 ──
+const CLD_CLOUD="dbnu6qevo";
+const CLD_PRESET="dbzjfdqu";
+
+async function uploadToCloudinary(file){
+  const fd=new FormData();
+  fd.append("file",file);
+  fd.append("upload_preset",CLD_PRESET);
+  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`,{method:"POST",body:fd});
+  if(!res.ok)throw new Error("Cloudinaryアップロード失敗");
+  const d=await res.json();
+  return d.secure_url;
+}
+
 const GENRES=["すべて","和食","洋食","中華","韓国料理","イタリアン","デザート","お弁当","麺・パスタ","スープ","サラダ","その他"];
 const SOURCES=[
   {id:"instagram",label:"Instagram",color:"#C2185B"},
@@ -100,20 +115,15 @@ function dbs_local(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch(e){
 // ── [FIX] Firestoreへの保存を非同期・エラー可視化・photos除外に修正 ──
 async function dbs_remote(d){
   if(!FB_ON||!fbDB||!U?.uid)return;
-  // photosはbase64でサイズが大きくFirestoreの1MB制限を超えるため除外
-  const recipesForFirestore=d.recipes.map(r=>{
-    const {photos,...rest}=r;
-    return rest;
-  });
+  // photosはCloudinaryのURLになったのでそのままFirestoreに保存可能
   try{
     await fbDB.collection("rb").doc(U.uid).set({
-      recipes:recipesForFirestore,
+      recipes:d.recipes,
       ingMaster:d.ingMaster,
       name:U.name||""
     });
   }catch(e){
     console.error("Firestore保存エラー:",e);
-    // ローカルには保存済みなのでユーザーへ通知
     showSaveError();
   }
 }
@@ -149,18 +159,8 @@ async function _loadFB(user){
     const doc=await fbDB.collection("rb").doc(user.uid).get();
     if(doc.exists){
       const d=doc.data();
-      // Firestoreのレシピにローカルのphotosをマージ（photosはローカルにのみ存在）
-      const localDB=dbl_local();
-      const localPhotosMap={};
-      if(localDB?.recipes){
-        localDB.recipes.forEach(r=>{if(r.photos&&r.photos.length>0)localPhotosMap[r.id]=r.photos;});
-      }
-      const mergedRecipes=(d.recipes||[]).map(r=>({
-        ...r,
-        photos:localPhotosMap[r.id]||[]
-      }));
       DB={
-        recipes:mergedRecipes,
+        recipes:(d.recipes||[]).map(r=>({...r,photos:r.photos||[]})),
         ingMaster:d.ingMaster||JSON.parse(JSON.stringify(DEFING)),
         users:[]
       };
@@ -205,7 +205,7 @@ let V={
   showIM:false,showCM:false,showFI:false,
   form:{title:"",genre:"和食",source:"cookpad",url:"",memo:"",tags:"",rating:5,thumbnail:"",ingredients:[],photos:[]},
   fStep:1,saving:false,aiState:"idle",aiMsg:"",
-  imc:null,fic:null,cmt:"list",cme:null,cnn:"",cncol:"#C85A3A",fc:null
+  imc:null,fic:null,cmt:"list",cme:null,cnn:"",cncol:"#C85A3A",fc:null,uploading:false
 };
 
 function sv(p){Object.assign(V,p);render();}
@@ -464,7 +464,20 @@ window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:
 window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
 window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
 window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[],photos:r.photos||[]},fStep:1,aiState:"idle",aiMsg:""});};
-window.addPhoto=el=>{const file=el.files?.[0];if(!file)return;const rd=new FileReader();rd.onload=e=>{V.form={...V.form,photos:[...(V.form.photos||[]),e.target.result]};el.value='';render();};rd.readAsDataURL(file);};
+window.addPhoto=async(el)=>{
+  const file=el.files?.[0];if(!file)return;
+  el.value='';
+  V.uploading=true;render();
+  try{
+    const url=await uploadToCloudinary(file);
+    V.form={...V.form,photos:[...(V.form.photos||[]),url]};
+    V.uploading=false;render();
+  }catch(e){
+    console.error("画像アップロード失敗:",e);
+    V.uploading=false;render();
+    alert("画像のアップロードに失敗しました。通信状態を確認してください。");
+  }
+};
 window.removePhoto=idx=>{V.form={...V.form,photos:(V.form.photos||[]).filter((_,i)=>i!==idx)};render();};
 window.phScroll=el=>{const idx=Math.round(el.scrollLeft/(el.offsetWidth||1));el.parentElement.querySelectorAll('[id^=phdot_]').forEach((d,i)=>{d.style.background=i===idx?'rgba(255,255,255,.95)':'rgba(255,255,255,.35)';});};
 window.tFI=i=>{V.fIng=V.fIng.includes(i)?V.fIng.filter(x=>x!==i):[...V.fIng,i];setTimeout(render,0);};
@@ -641,7 +654,8 @@ function vAdd(){
           <input type="file" id="fi_photo" accept="image/*" style="display:none" onchange="addPhoto(this)">
           <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
             ${(f.photos||[]).map((src,i)=>`<div style="position:relative;flex-shrink:0"><img src="${esc(src)}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--b3)"><button onclick="removePhoto(${i})" style="position:absolute;top:-6px;right:-6px;background:var(--rd);border:none;border-radius:50%;width:20px;height:20px;color:var(--wh);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button></div>`).join("")}
-            <label for="fi_photo" style="width:80px;height:80px;border:1.5px dashed var(--b4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--bl);font-size:11px;gap:3px;flex-shrink:0;background:var(--wh)"><span style="font-size:22px;line-height:1">＋</span><span>写真追加</span></label>
+            ${V.uploading?`<div style="width:80px;height:80px;border-radius:8px;border:1px solid var(--b3);background:var(--b2);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--bl);gap:4px;flex-shrink:0"><div style="width:20px;height:20px;border:2px solid var(--am);border-top-color:transparent;border-radius:50%;animation:spin 0.8s linear infinite"></div>送信中</div>`:""}
+            <label for="fi_photo" style="width:80px;height:80px;border:1.5px dashed var(--b4);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--bl);font-size:11px;gap:3px;flex-shrink:0;background:var(--wh);${V.uploading?"opacity:.5;pointer-events:none":""}"><span style="font-size:22px;line-height:1">＋</span><span>写真追加</span></label>
           </div>
         </div>
         <div style="margin-bottom:14px"><label class="lbl">料理名</label><input id="fi_title" class="fi" placeholder="例：肉じゃが" value="${esc(f.title)}" oninput="uf('title',this.value)" oncompositionstart="startCompose()" oncompositionend="endCompose('title',this.value)"></div>
@@ -672,6 +686,7 @@ function vAdd(){
         </div>
       `}
     </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     ${V.showFI?iMod(f.ingredients,"tFmI","sv({showFI:false})",V.fic,"sv({fic:"):""}
     ${V.showCM?catMod():""}
   </div>`;}
