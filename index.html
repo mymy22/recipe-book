@@ -474,8 +474,8 @@ window.doSave=()=>{
 };
 
 window.openDetail=id=>{const r=V.recipes.find(x=>x.id===id);if(r)sv({sel:r,view:"detail"});};
-window.doCooked=()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
-window.doDelete=()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
+window.doCooked=async()=>{const r=V.sel;if(!r)return;const nc=(r.cookedCount||0)+1;DB.recipes=DB.recipes.map(x=>x.id===r.id?{...x,cookedCount:nc}:x);dbs_local(DB);await dbs_remote(DB);sv({recipes:[...DB.recipes],sel:{...r,cookedCount:nc}});};
+window.doDelete=async()=>{const r=V.sel;if(!r||!confirm("「"+r.title+"」を削除しますか？"))return;DB.recipes=DB.recipes.filter(x=>x.id!==r.id);dbs_local(DB);await dbs_remote(DB);sv({recipes:[...DB.recipes],view:"home",sel:null});};
 window.goEdit=()=>{const r=V.sel;if(!r)return;sv({view:"edit",form:{title:r.title,genre:r.genre,source:r.source,url:r.url||"",memo:r.memo||"",tags:(r.tags||[]).join(", "),rating:r.rating||5,thumbnail:r.thumbnail||"",ingredients:r.ingredients||[],photos:r.photos||[]},fStep:1,aiState:"idle",aiMsg:""});};
 window.addPhoto=async(el)=>{
   const file=el.files?.[0];if(!file)return;
