@@ -113,19 +113,32 @@ function dbl_local(){try{const d=localStorage.getItem(DBK);if(d)return JSON.pars
 function dbs_local(d){try{localStorage.setItem(DBK,JSON.stringify(d));}catch(e){console.error("localStorage保存失敗:",e);}}
 
 // ── [FIX] Firestoreへの保存を非同期・エラー可視化・photos除外に修正 ──
+// 保存キュー：連続保存時の競合を防ぐ
+let _saveQueue=null;
+let _savePending=false;
+
 async function dbs_remote(d){
   if(!FB_ON||!fbDB||!U?.uid)return;
-  // photosはCloudinaryのURLになったのでそのままFirestoreに保存可能
-  try{
-    await fbDB.collection("rb").doc(U.uid).set({
-      recipes:d.recipes,
-      ingMaster:d.ingMaster,
-      name:U.name||""
-    });
-  }catch(e){
-    console.error("Firestore保存エラー:",e);
-    showSaveError();
+  // 最新のデータを常にキューに保持
+  _saveQueue=d;
+  // すでに保存処理中なら待機（最新データで上書きされる）
+  if(_savePending)return;
+  _savePending=true;
+  while(_saveQueue){
+    const toSave=_saveQueue;
+    _saveQueue=null;
+    try{
+      await fbDB.collection("rb").doc(U.uid).set({
+        recipes:toSave.recipes,
+        ingMaster:toSave.ingMaster,
+        name:U.name||""
+      });
+    }catch(e){
+      console.error("Firestore保存エラー:",e);
+      showSaveError();
+    }
   }
+  _savePending=false;
 }
 
 let _saveErrTimer=null;
